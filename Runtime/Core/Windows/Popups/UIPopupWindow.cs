@@ -76,12 +76,9 @@ namespace UISystem
             }
         }
 
-        public virtual void AddListener(Action<PopupCallbackParameters> listener)
+        public void AddListener(Action<PopupCallbackParameters> listener)
         {
-            if (listener != null)
-            {
-                _callback += listener;
-            }
+            _callback += listener;
         }
         #endregion
 

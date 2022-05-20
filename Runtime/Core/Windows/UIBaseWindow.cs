@@ -156,20 +156,11 @@ namespace UISystem
 
         }
 
-        public bool IsWindowCompletelyOpen()
-        {
-            return _currentState == WindowState.Open;
-        }
+        public bool IsWindowCompletelyOpen() => _currentState == WindowState.Open;
 
-        public bool IsWindowCompletelyClosed()
-        {
-            return _currentState == WindowState.Closed;
-        }
+        public bool IsWindowCompletelyClosed() => _currentState == WindowState.Closed;
 
-        public bool IsWindowVisible()
-        {
-            return _currentState == WindowState.OpenAnimation || _currentState == WindowState.Open;
-        }
+        public bool IsWindowVisible() => _currentState == WindowState.OpenAnimation || _currentState == WindowState.Open;
 
         internal void DestroyWindow()
         {
@@ -182,7 +173,7 @@ namespace UISystem
 #endif
         }
 
-        public virtual void SwitchState(WindowState state)
+        internal void SwitchState(WindowState state)
         {
             CurrentWindowState = state;
         }
