@@ -56,8 +56,8 @@ namespace UISystem
 
         public T GetWindow<T>(string nameId) where T : UIBaseWindow
         {
-            if (HasWindow(name))
-                return _dict[name] as T;
+            if (HasWindow(nameId))
+                return _dict[nameId] as T;
 
             var prefab = _popupDatabase.GetWindow<T>(nameId, out var index);
             return LoadWindowByPrefab(prefab, true, index);
