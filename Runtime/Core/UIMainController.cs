@@ -1,73 +1,61 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 
 namespace UISystem
 {
     public class UIMainController : MonoBehaviour
     {
-
-        [SerializeField] private ReferenceWindow[] preloadedWindows;
-        [SerializeField] private RectTransform windowsRoot;
-        [SerializeField] private RectTransform sortedWindowsRoot;
-        [SerializeField] private RectTransform preloadedWindowsRoot;
+        [SerializeField] private UIBaseWindow[] _preloadedWindows;
+        [SerializeField] private RectTransform _windowsRoot;
+        [SerializeField] private RectTransform _sortedWindowsRoot;
+        [SerializeField] private RectTransform _preloadedWindowsRoot;
         [SerializeField] private UIWindowAnimationController _animationController;
-
 
         /// <summary>
         /// u can set up a default popupdatabase, or use a set method for late initialization(like bundles)
         /// </summary>
-        [SerializeField] private BasePopupDatabase _popupDatabase;
+        [SerializeField] private PopupDatabase _popupDatabase;
 
-        private readonly Dictionary<string, UIBaseWindow> _dict = new Dictionary<string, UIBaseWindow>();
-        private readonly List<int> _indexes = new List<int>();
-        private readonly List<UIBaseWindow> _activeWindowsQueue = new List<UIBaseWindow>();
-        private readonly Queue<UIBaseWindow> _toOpenWindowsQueue = new Queue<UIBaseWindow>();
+        private readonly Dictionary<string, UIBaseWindow> _dict = new();
+        private readonly List<int> _indexes = new();
+        private readonly List<UIBaseWindow> _activeWindowsQueue = new();
+        private readonly Queue<UIBaseWindow> _toOpenWindowsQueue = new();
 
-        public AnchorsController AnchorController { get; } = new AnchorsController();
         public event Action<string> OnWindowAdded;
         public event Action<string> OnWindowRemoved;
         public event Action<UIBaseWindow> OnWindowOpened;
         public event Action<UIBaseWindow> OnWindowClosed;
 
-        #region Interface
-
-        public void SetExternalDatabase(BasePopupDatabase popupDatabase)
+        public void SetExternalDatabase(PopupDatabase popupDatabase)
         {
             _popupDatabase = popupDatabase;
         }
-
-
-#if UISYSTEM_ADDRESSABLES
-        public async Cysharp.Threading.Tasks.UniTask<T> GetWindowAsync<T>(string nameId) where T : UIBaseWindow
+        
+        public async UniTask<T> GetWindowAsync<T>(string nameId) where T : UIBaseWindow
         {
             if (HasWindow(nameId))
                 return _dict[nameId] as T;
 
-            if (_popupDatabase is IAsyncPopupBase db)
-            {
-                var (prefab, index) = await db.GetWindowAsync<T>(nameId);
-                return LoadWindowByPrefab(prefab, true, index);
-            }
-
-            return GetWindow<T>(nameId);
+            var (prefab, index) = await _popupDatabase.GetWindowAsync<T>(nameId);
+            return LoadWindowByPrefab(prefab, true, index);
         }
-#endif
 
         public T GetWindow<T>(string nameId) where T : UIBaseWindow
         {
             if (HasWindow(nameId))
                 return _dict[nameId] as T;
 
-            var prefab = _popupDatabase.GetWindow<T>(nameId, out var index);
-            return LoadWindowByPrefab(prefab, true, index);
+            var prefab = _popupDatabase.GetWindow<T>(nameId);
+            return LoadWindowByPrefab(prefab.Item1, true, prefab.Item2);
         }
 
         private T LoadWindowByPrefab<T>(T prefabComponent, bool attachToUIRoot = false, int index = -1)
             where T : UIBaseWindow
         {
             T window = attachToUIRoot
-                ? (Instantiate(prefabComponent, index > -1 ? sortedWindowsRoot : windowsRoot, false))
+                ? (Instantiate(prefabComponent, index > -1 ? _sortedWindowsRoot : _windowsRoot, false))
                 : Instantiate(prefabComponent);
 
             if (index > -1)
@@ -80,21 +68,21 @@ namespace UISystem
             AddWindow(window);
             return window;
         }
-        
+
         private bool HasWindow(string nameId) => _dict.ContainsKey(nameId);
 
         private void AddWindow(UIBaseWindow window)
         {
-            _dict.Add(window.nameId, window);
+            _dict.Add(window.NameId, window);
             window.CreateWindow(this);
-            OnWindowAdded?.Invoke(window.nameId);
+            OnWindowAdded?.Invoke(window.NameId);
         }
 
         public void RemoveWindow(UIBaseWindow window)
         {
-            OnWindowRemoved?.Invoke(window.nameId);
+            OnWindowRemoved?.Invoke(window.NameId);
 
-            _dict.Remove(window.nameId);
+            _dict.Remove(window.NameId);
             if (AnimationController != null)
             {
                 AnimationController.RemoveWindowAnimation(window);
@@ -182,8 +170,6 @@ namespace UISystem
             }
         }
 
-        #endregion
-
         void Update()
         {
             if (Input.GetKeyDown(KeyCode.Escape))
@@ -197,15 +183,13 @@ namespace UISystem
             }
         }
 
-        #region Utils
-
         protected void Awake()
         {
             Instance = this;
             DontDestroyOnLoad(this.gameObject);
-            foreach (var windowReference in preloadedWindows)
+            foreach (var windows in _preloadedWindows)
             {
-                var window = (Instantiate(windowReference.GetSource(), preloadedWindowsRoot, false));
+                var window = Instantiate(windows, _preloadedWindowsRoot, false);
                 AddWindow(window);
             }
         }
@@ -225,8 +209,6 @@ namespace UISystem
             _indexes.Add(index);
             return count;
         }
-
-        #endregion
 
 
         #region internal

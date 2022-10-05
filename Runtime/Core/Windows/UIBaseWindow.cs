@@ -2,13 +2,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.AddressableAssets;
 using UnityEngine.Serialization;
 
 namespace UISystem
 {
     public abstract class UIBaseWindow : MonoBehaviour
     {
-
         public enum WindowState
         {
             Open,
@@ -17,16 +17,28 @@ namespace UISystem
             OpenAnimation
         }
 
-        #region Unity properties
+        [SerializeField] private string _nameId;
+        [SerializeField] private WindowState _currentState = WindowState.Closed;
 
-        public string nameId;
-        [SerializeField]
-        private WindowState _currentState = WindowState.Closed;
+        /// <summary>
+        /// Window will not be added to Queue
+        /// </summary>
+        [Tooltip("Window will not be added to Queue")] [SerializeField]
+        private bool _preventQueue;
+
+        /// <summary>
+        /// Window does not react to Escape
+        /// </summary>
+        [Tooltip("Window does not react to Escape")] [SerializeField]
+        private bool _preventEscape;
+
+        [SerializeField] private UIBaseWindowAnimation _windowAnimation;
 
         public event Action<WindowState> OnCurrentWindowState;
+
         public WindowState CurrentWindowState
         {
-            get { return _currentState; }
+            get => _currentState;
             set
             {
                 if (value != _currentState)
@@ -37,85 +49,64 @@ namespace UISystem
             }
         }
 
-        public UIBaseWindowAnimation windowAnimation;
-
-        /// <summary>
-        /// Window will not be added to Queue
-        /// </summary>
-        [Tooltip("Window will not be added to Queue")]
-        [SerializeField]
-        protected bool _preventQueue;
+        public string NameId => _nameId;
         public bool PreventQueue => _preventQueue;
-        
-        /// <summary>
-        /// Window does not react to Escape
-        /// </summary>
-        [Tooltip("Window does not react to Escape")]
-        [SerializeField]
-        protected bool _preventEscape;
         public bool PreventEscape => _preventEscape;
 
-        #endregion
-
-        #region Private fields
-
-        //private List<UIBaseWindow> _childPopups = new List<UIBaseWindow>();
-        private UIMainController _controller { get; set; }
-
-        #endregion
+        public UIBaseWindowAnimation WindowAnimation => _windowAnimation;
 
         public event Action OnWindowOpen;
         public event Action OnWindowClosed;
 
-        #region Interface
-
         public void SwitchWindow()
         {
-            _controller.AutoCloseAllWindow();
+            Controller.AutoCloseAllWindow();
             OpenWindow();
         }
 
         [ContextMenu("OpenWindow")]
         public virtual void OpenWindow()
         {
-            if (_controller.AnimationController != null)
+            if (Controller.AnimationController != null)
             {
-                _controller.AnimationController.PlayOpenAnimation(this);
+                Controller.AnimationController.PlayOpenAnimation(this);
             }
             else
             {
                 gameObject.SetActive(true);
                 SwitchState(WindowState.Open);
             }
-            if (!_preventQueue)
-            {
-                _controller.AddWindowToQueue(this);
-            }
-            _controller.ReportOpen(this);
-            OnWindowOpen?.Invoke();
 
+            if (!PreventQueue)
+            {
+                Controller.AddWindowToQueue(this);
+            }
+
+            Controller.ReportOpen(this);
+            OnWindowOpen?.Invoke();
         }
 
         [ContextMenu("OpenWindowInQueue")]
         public virtual void OpenWindowInQueue()
         {
-            _controller.OpenInQueue(this);
+            Controller.OpenInQueue(this);
         }
 
         public virtual void CloseWindow()
         {
-            if (_controller != null)
+            if (Controller != null)
             {
-                if (_controller.AnimationController != null)
+                if (Controller.AnimationController != null)
                 {
-                    _controller.AnimationController.PlayCloseAnimation(this);
-                    _controller.RemoveWindowFromQueue(this);
+                    Controller.AnimationController.PlayCloseAnimation(this);
+                    Controller.RemoveWindowFromQueue(this);
                 }
                 else
                 {
                     HideWindowImmediately();
                 }
-                _controller.ReportClose(this);
+
+                Controller.ReportClose(this);
                 OnWindowClosed?.Invoke();
             }
         }
@@ -128,49 +119,47 @@ namespace UISystem
 
         public virtual void HideWindowImmediately()
         {
-            if (_controller.AnimationController != null)
+            if (Controller.AnimationController != null)
             {
-                _controller.AnimationController.HideImmediately(this);
+                Controller.AnimationController.HideImmediately(this);
             }
+
             gameObject.SetActive(false);
             SwitchState(WindowState.Closed);
 
-            _controller.RemoveWindowFromQueue(this);
-            _controller.ReportClose(this);
+            Controller.RemoveWindowFromQueue(this);
+            Controller.ReportClose(this);
         }
 
         public virtual void ShowWindowImmediately()
         {
-            if (_controller.AnimationController != null)
+            if (Controller.AnimationController != null)
             {
-                _controller.AnimationController.ShowImmediately(this);
+                Controller.AnimationController.ShowImmediately(this);
             }
+
             gameObject.SetActive(true);
             SwitchState(WindowState.Open);
-            if (!_preventQueue)
+            if (!PreventQueue)
             {
-                _controller.AddWindowToQueue(this);
+                Controller.AddWindowToQueue(this);
             }
-            _controller.ReportOpen(this);
-            OnWindowOpen?.Invoke();
 
+            Controller.ReportOpen(this);
+            OnWindowOpen?.Invoke();
         }
 
         public bool IsWindowCompletelyOpen() => _currentState == WindowState.Open;
 
         public bool IsWindowCompletelyClosed() => _currentState == WindowState.Closed;
 
-        public bool IsWindowVisible() => _currentState == WindowState.OpenAnimation || _currentState == WindowState.Open;
+        protected bool IsWindowVisible() =>
+            _currentState == WindowState.OpenAnimation || _currentState == WindowState.Open;
 
         internal void DestroyWindow()
         {
-            //DestroyChilds();
             //maybe need to change it to controller
-#if UISYSTEM_ADDRESSABLES
-            UnityEngine.AddressableAssets.Addressables.ReleaseInstance(gameObject);
-#else
-            Destroy(gameObject);
-#endif
+            Addressables.ReleaseInstance(gameObject);
         }
 
         internal void SwitchState(WindowState state)
@@ -178,95 +167,17 @@ namespace UISystem
             CurrentWindowState = state;
         }
 
-        public void PreventWindowEscape(bool value)
-        {
-            _preventEscape = value;
-        }
-        public void PreventWindowQueue(bool value)
-        {
-            _preventQueue = value;
-        }
-
-
-        //public List<RectTransform> AdditionalRoots = new List<RectTransform>();
-        
-        //public void AddChildPopup(UIBaseWindow prefab)
-        //{
-        //    _childPopups.Add(prefab);
-        //}
-
-        //public T AddChildWindow<T>(T window, Sibling sibling = Sibling.SetAsLastSibling, bool active = true) where T : UIBaseWindow
-        //{
-        //    return AddChildWindow(window, (RectTransform)transform, sibling, active);
-        //}
-
-        //public T AddChildWindow<T>(T window, string rootId, Sibling sibling = Sibling.SetAsLastSibling, bool active = true) where T : UIBaseWindow
-        //{
-        //    var additionalRoot = AdditionalRoots.Find(x => x.name == rootId);
-        //    return AddChildWindow(window, additionalRoot, sibling, active);
-        //}
-
-        //public void RemoveChildWindow(UIBaseWindow childWindow)
-        //{
-        //    if (childWindow)
-        //    {
-        //        _childPopups.Remove(childWindow);
-        //        _controller.RemoveWindow(childWindow);
-        //    }
-        //}
-
-        //public T AddChildWindow<T>(T window, RectTransform root, Sibling sibling = Sibling.SetAsLastSibling, bool active = true) where T : UIBaseWindow
-        //{
-        //    T existsWindow = _controller.GetWindow<T>(window.nameId);
-        //    if (existsWindow != null)
-        //    {
-        //        return existsWindow;
-        //    }
-
-        //    var cloned = window.InstantiateClone(root, sibling);
-        //    cloned.gameObject.SetActive(active);
-        //    cloned.ParentWindow = this;
-        //    _childPopups.Add(cloned);
-        //    return cloned;
-        //}
-
-        //public T GetChildWindow<T>() where T : UIBaseWindow
-        //{
-        //    var window = _childPopups.Find(x => x is T);
-        //    if (window)
-        //    {
-        //        return window as T;
-        //    }
-        //    return null;
-        //}
-
-        //public T GetChildWindow<T>(string id) where T : UIBaseWindow
-        //{
-        //    var window = _childPopups.Find(x => x is T && x.nameId == id);
-        //    if (window != null)
-        //    {
-        //        return window as T;
-        //    }
-        //    return null;
-        //}
-
-        //public void DestroyChilds()
-        //{
-        //    foreach (var childPopup in _childPopups)
-        //    {
-        //        _controller.RemoveWindow(childPopup);
-        //    }
-        //}
-
-#endregion
-
-#region Utils
+        private UIMainController Controller { get; set; }
 
         internal void CreateWindow(UIMainController controller)
         {
-            _controller = controller;
+            Controller = controller;
         }
-#endregion
 
+        private void OnValidate()
+        {
+            _windowAnimation = gameObject.GetComponent<UIBaseWindowAnimation>();
+            _nameId = gameObject.name;
+        }
     }
 }

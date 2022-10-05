@@ -1,26 +1,22 @@
 ﻿using UnityEngine;
 using System;
+
 namespace UISystem
 {
     public class UIPopupWindow : UIBaseWindow
     {
+        protected Action<PopupCallbackParameters> callback;
 
-        protected Action<PopupCallbackParameters> _callback;
-
-        #region Overrides
 
         public override void CloseWindow()
         {
-            _callback = null;
+            callback = null;
             base.CloseWindow();
         }
 
-        #endregion
-
-        #region Interface
-        public virtual void OpenPopup(Action<PopupCallbackParameters> callback, bool queue = false)
+        public virtual void OpenPopup(Action<PopupCallbackParameters> action, bool queue = false)
         {
-            _callback = callback;
+            callback = action;
             if (!queue)
                 OpenWindow();
             else
@@ -39,48 +35,40 @@ namespace UISystem
         {
             CloseWindow(new PopupCallbackParameters() { CallbackType = PopupCallbackType.Accepted });
         }
+
         public virtual void ClosePopupDenied()
         {
             CloseWindow(new PopupCallbackParameters() { CallbackType = PopupCallbackType.Denied });
         }
 
-        #endregion
-
-        #region Overrides
-
         public override void TryCloseWindowByEscapeButton()
         {
-            if (!_preventEscape)
+            if (!PreventEscape)
             {
-                if (IsWindowCompletelyOpen())//User can close popup only when it CompletelyOpen. Prevents repeated pressing.
+                if (IsWindowCompletelyOpen()) //User can close popup only when it CompletelyOpen. Prevents repeated pressing.
                 {
                     CloseWindow(new PopupCallbackParameters() { CallbackType = PopupCallbackType.Denied });
                 }
             }
         }
 
-        #endregion
-
-        #region Utils
-
         protected void CloseWindow(PopupCallbackParameters popupCallbackParameters)
         {
-            if (IsWindowVisible())//User can close popup when WindowState is OpenAnimation or Open. Prevents repeated pressing.
+            if (IsWindowVisible()) //User can close popup when WindowState is OpenAnimation or Open. Prevents repeated pressing.
             {
-                if (_callback != null)
+                if (callback != null)
                 {
-                    _callback(popupCallbackParameters);
-                    _callback = null;
+                    callback(popupCallbackParameters);
+                    callback = null;
                 }
+
                 CloseWindow();
             }
         }
 
         public void AddListener(Action<PopupCallbackParameters> listener)
         {
-            _callback += listener;
+            callback += listener;
         }
-        #endregion
-
     }
 }

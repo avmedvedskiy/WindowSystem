@@ -1,15 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+
 namespace UISystem
 {
     public class UIWindowAnimationController : MonoBehaviour
     {
+        private readonly List<UIBaseWindow> _animatedWindows = new(); //TODO: clear on scene switch
+        private readonly List<UIBaseWindow> _stoppedAnimations = new();
 
-        private List<UIBaseWindow> _animatedWindows = new List<UIBaseWindow>(); //TODO: clear on scene switch
-        private List<UIBaseWindow> _stoppedAnimations = new List<UIBaseWindow>();
-
-        #region Update
 
         void Update()
         {
@@ -26,26 +25,22 @@ namespace UISystem
             _stoppedAnimations.Clear();
         }
 
-        #endregion
-
-        #region Interface
-
         public void PlayOpenAnimation(UIBaseWindow targetWindow)
         {
             targetWindow.gameObject.SetActive(true);
-            if (targetWindow.windowAnimation)
+            if (targetWindow.WindowAnimation)
             {
                 if (targetWindow.CurrentWindowState == UIBaseWindow.WindowState.Closed)
                 {
                     targetWindow.SwitchState(UIBaseWindow.WindowState.OpenAnimation);
-                    targetWindow.windowAnimation.PlayOpenAnimation();
+                    targetWindow.WindowAnimation.PlayOpenAnimation();
                     _animatedWindows.Add(targetWindow);
                 }
                 else if (targetWindow.CurrentWindowState == UIBaseWindow.WindowState.CloseAnimation)
                 {
                     targetWindow.SwitchState(UIBaseWindow.WindowState.OpenAnimation);
-                    targetWindow.windowAnimation.StopAnimation();
-                    targetWindow.windowAnimation.PlayOpenAnimation();
+                    targetWindow.WindowAnimation.StopAnimation();
+                    targetWindow.WindowAnimation.PlayOpenAnimation();
                 }
             }
             else
@@ -59,12 +54,12 @@ namespace UISystem
             if (targetWindow == null)
                 return;
 
-            if (targetWindow.windowAnimation != null)
+            if (targetWindow.WindowAnimation != null)
             {
                 if (targetWindow.CurrentWindowState == UIBaseWindow.WindowState.Open)
                 {
                     targetWindow.SwitchState(UIBaseWindow.WindowState.CloseAnimation);
-                    targetWindow.windowAnimation.PlayCloseAnimation();
+                    targetWindow.WindowAnimation.PlayCloseAnimation();
                     _animatedWindows.Add(targetWindow);
                 }
                 else if (targetWindow.CurrentWindowState == UIBaseWindow.WindowState.Closed)
@@ -74,8 +69,8 @@ namespace UISystem
                 else if (targetWindow.CurrentWindowState == UIBaseWindow.WindowState.OpenAnimation)
                 {
                     targetWindow.SwitchState(UIBaseWindow.WindowState.CloseAnimation);
-                    targetWindow.windowAnimation.StopAnimation();
-                    targetWindow.windowAnimation.PlayCloseAnimation();
+                    targetWindow.WindowAnimation.StopAnimation();
+                    targetWindow.WindowAnimation.PlayCloseAnimation();
                 }
             }
             else
@@ -87,16 +82,17 @@ namespace UISystem
 
         public void HideImmediately(UIBaseWindow targetWindow)
         {
-            if (targetWindow.windowAnimation)
+            if (targetWindow.WindowAnimation)
             {
-                targetWindow.windowAnimation.HideImmediately();
+                targetWindow.WindowAnimation.HideImmediately();
             }
         }
+
         public void ShowImmediately(UIBaseWindow targetWindow)
         {
-            if (targetWindow.windowAnimation)
+            if (targetWindow.WindowAnimation)
             {
-                targetWindow.windowAnimation.ShowImmediately();
+                targetWindow.WindowAnimation.ShowImmediately();
             }
         }
 
@@ -106,29 +102,27 @@ namespace UISystem
             _stoppedAnimations.Remove(targetWindow);
         }
 
-        #endregion
-
-        #region Utils
-
         private void AnimateWindow(UIBaseWindow window)
         {
             switch (window.CurrentWindowState)
             {
                 case UIBaseWindow.WindowState.CloseAnimation:
-                    window.windowAnimation.UpdateAnimation();
-                    if (!window.windowAnimation.IsAnimationPlaying())
+                    window.WindowAnimation.UpdateAnimation();
+                    if (!window.WindowAnimation.IsAnimationPlaying())
                     {
                         window.SwitchState(UIBaseWindow.WindowState.Closed);
                         StopWindowAnimation(window);
                     }
+
                     break;
                 case UIBaseWindow.WindowState.OpenAnimation:
-                    window.windowAnimation.UpdateAnimation();
-                    if (!window.windowAnimation.IsAnimationPlaying())
+                    window.WindowAnimation.UpdateAnimation();
+                    if (!window.WindowAnimation.IsAnimationPlaying())
                     {
                         window.SwitchState(UIBaseWindow.WindowState.Open);
                         StopWindowAnimation(window);
                     }
+
                     break;
                 default:
                     //
@@ -145,8 +139,5 @@ namespace UISystem
                 window.gameObject.SetActive(false);
             }
         }
-
-        #endregion
-
     }
 }

@@ -1,38 +1,56 @@
-﻿using System.Collections.Generic;
+﻿using Cysharp.Threading.Tasks;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 
 namespace UISystem
 {
+    [CreateAssetMenu(fileName = NAME, menuName = "ScriptableObjects/UI" + NAME)]
+    public class PopupDatabase : ScriptableObject
+    {
+        private const string NAME = "PopupDatabase";
 
-    [CreateAssetMenu(fileName = NAME, menuName = Constants.CREATE_ASSET_MENU + NAME)]
-	public class PopupDatabase : BasePopupDatabase
-	{
-		public const string NAME = "PopupDatabase";
-		public List<ReferenceWindow> popups;
+        [System.Serializable]
+        public class AssetReferenceWindow
+        {
+            [SerializeField] private string _id;
+            [SerializeField] private ComponentReference<UIBaseWindow> _window;
 
-		public override T GetWindow<T>(string name, out int index)
-		{
-			index = popups.FindIndex(x => x != null && x.name == name);
-			if (index != -1)
-				return popups[index].GetSource() as T;
-			else
-				return null;
-		}
+            public string Id
+            {
+                get => _id;
+                set => _id = value;
+            }
 
-		//public override void AddAdditionalWindows(List<ReferenceWindow> additionalWindows)
-		//{
-		//	popups.AddRange(additionalWindows);
-		//}
+            public ComponentReference<UIBaseWindow> Window => _window;
+        }
+
+        [SerializeField] private List<AssetReferenceWindow> _popups;
+
+        public (T, int) GetWindow<T>(string windowName) where T : UIBaseWindow
+        {
+            var index = GetIndex(windowName);
+            var asset = _popups[index];
+            var w = asset.Window.LoadAssetAsync().WaitForCompletion();
+            return (w as T, index);
+        }
+
+        public async UniTask<(T, int)> GetWindowAsync<T>(string windowName) where T : UIBaseWindow
+        {
+            int index = GetIndex(windowName);
+            var asset = _popups[index];
+            var w = await asset.Window.LoadAssetAsync();
+            return (w as T, index);
+        }
+
+        private int GetIndex(string windowName) => _popups.FindIndex(x => x.Id == windowName);
 
 #if UNITY_EDITOR
-
-		public static void Create(UIBaseWindow window)
-		{
-			var so = CreateInstance<DirectReferenceWindow>();
-			so.asset = window;
-			UnityEditor.AssetDatabase.CreateAsset(so, string.Format("Assets/Resources/UIReferences/{0}.asset", window.nameId));
-		}
+        private void OnValidate()
+        {
+            foreach (var p in _popups)
+                p.Id = p.Window.editorAsset?.name;
+        }
 #endif
-
-	}
+    }
 }

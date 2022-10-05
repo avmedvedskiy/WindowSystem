@@ -7,7 +7,7 @@ namespace UISystem
     {
         private const float DEFAULT_SCREEN_RATIO = 16f / 9f;
         private const float FACTOR = 4f / 3f;
-        [SerializeField] protected CanvasScaler canvasScaler;
+        [SerializeField] protected CanvasScaler _canvasScaler;
 
         private void Awake()
         {
@@ -22,7 +22,7 @@ namespace UISystem
             float scale = (float)Mathf.Max(width, height) / Mathf.Min(width, height);
             if (scale > DEFAULT_SCREEN_RATIO)
             {
-                canvasScaler.matchWidthOrHeight = (scale - DEFAULT_SCREEN_RATIO) * FACTOR;
+                _canvasScaler.matchWidthOrHeight = (scale - DEFAULT_SCREEN_RATIO) * FACTOR;
             }
         }
     }

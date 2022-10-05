@@ -1,4 +1,3 @@
-#if UISYSTEM_ADDRESSABLES
 using Cysharp.Threading.Tasks;
 using UISystem;
 
@@ -22,5 +21,3 @@ public static class UIWindowAsyncExtensions
         await UniTask.WaitUntil(window.IsWindowCompletelyClosed);
     }
 }
-
-#endif

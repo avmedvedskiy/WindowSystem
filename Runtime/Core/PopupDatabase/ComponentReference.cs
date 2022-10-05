@@ -1,30 +1,39 @@
-#if UISYSTEM_ADDRESSABLES
+using System;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using Object = UnityEngine.Object;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
+
 namespace UISystem
 {
+    [Serializable]
     public class ComponentReference<TComponent> : AssetReference
     {
         public ComponentReference(string guid) : base(guid)
         {
         }
 
-        public new AsyncOperationHandle<TComponent> InstantiateAsync(Vector3 position, Quaternion rotation, Transform parent = null)
+        public new AsyncOperationHandle<TComponent> InstantiateAsync(Vector3 position, Quaternion rotation,
+            Transform parent = null)
         {
-            return Addressables.ResourceManager.CreateChainOperation(base.InstantiateAsync(position, rotation, parent), GameObjectReady);
+            return Addressables.ResourceManager.CreateChainOperation(base.InstantiateAsync(position, rotation, parent),
+                GameObjectReady);
         }
 
-        public new AsyncOperationHandle<TComponent> InstantiateAsync(Transform parent = null, bool instantiateInWorldSpace = false)
+        public new AsyncOperationHandle<TComponent> InstantiateAsync(Transform parent = null,
+            bool instantiateInWorldSpace = false)
         {
-            return Addressables.ResourceManager.CreateChainOperation(base.InstantiateAsync(parent, instantiateInWorldSpace), GameObjectReady);
+            return Addressables.ResourceManager.CreateChainOperation(
+                base.InstantiateAsync(parent, instantiateInWorldSpace), GameObjectReady);
         }
+
         public AsyncOperationHandle<TComponent> LoadAssetAsync()
         {
-            return Addressables.ResourceManager.CreateChainOperation(base.LoadAssetAsync<GameObject>(), GameObjectReady);
+            return Addressables.ResourceManager.CreateChainOperation(base.LoadAssetAsync<GameObject>(),
+                GameObjectReady);
         }
 
         AsyncOperationHandle<TComponent> GameObjectReady(AsyncOperationHandle<GameObject> arg)
@@ -62,7 +71,5 @@ namespace UISystem
             // Release the handle
             Addressables.Release(op);
         }
-
     }
 }
-#endif

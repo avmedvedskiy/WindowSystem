@@ -7,25 +7,25 @@ namespace UISystem
     [Serializable]
     public class AnchorsController
     {
-        private Dictionary<string, List<IAnchor>> anchors = new Dictionary<string, List<IAnchor>>();
+        private Dictionary<string, List<IAnchor>> _anchors = new();
 
         public event Action<IAnchor> OnAnchorAdded;
         public event Action<IAnchor> OnAnchorRemoved;
 
         public IAnchor GetAnchor(string id)
         {
-            if (anchors.ContainsKey(id) && anchors[id].Count > 0)
+            if (_anchors.ContainsKey(id) && _anchors[id].Count > 0)
             {
-                return anchors[id].Last();
+                return _anchors[id].Last();
             }
             return null;
         }
 
         public Vector3 GetPosition(string id)
         {
-            if (!anchors.ContainsKey(id))
+            if (!_anchors.ContainsKey(id))
             {
-                return default(Vector3);
+                return default;
             }
 
             return GetAnchor(id).Position.position;
@@ -36,22 +36,22 @@ namespace UISystem
             if (anchor == null)
                 return;
 
-            if (!anchors.ContainsKey(anchor.Id))
+            if (!_anchors.ContainsKey(anchor.Id))
             {
-                anchors.Add(anchor.Id, new List<IAnchor>());
+                _anchors.Add(anchor.Id, new List<IAnchor>());
             }
 
-            anchors[anchor.Id].Remove(anchor);
-            anchors[anchor.Id].Add(anchor);
+            _anchors[anchor.Id].Remove(anchor);
+            _anchors[anchor.Id].Add(anchor);
 
             OnAnchorAdded?.Invoke(anchor);
         }
 
         public void RemoveAnchor(IAnchor anchor)
         {
-            if (anchor != null && anchors.ContainsKey(anchor.Id))
+            if (anchor != null && _anchors.ContainsKey(anchor.Id))
             {
-                anchors[anchor.Id].Remove(anchor);
+                _anchors[anchor.Id].Remove(anchor);
                 OnAnchorRemoved?.Invoke(anchor);
             }
         }
