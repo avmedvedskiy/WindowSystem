@@ -5,7 +5,7 @@ using UnityEngine.AddressableAssets;
 
 namespace UISystem
 {
-    [CreateAssetMenu(fileName = NAME, menuName = "ScriptableObjects/UI" + NAME)]
+    [CreateAssetMenu(fileName = NAME, menuName = "Scriptable Objects/UI/" + NAME)]
     public class PopupDatabase : ScriptableObject
     {
         private const string NAME = "PopupDatabase";
