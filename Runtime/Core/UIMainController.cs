@@ -18,13 +18,11 @@ namespace UISystem
         /// </summary>
         [SerializeField] private PopupDatabase _popupDatabase;
 
-        private readonly Dictionary<string, UIBaseWindow> _dict = new();
+        private readonly Dictionary<string, UIBaseWindow> _loadedWindows = new();
         private readonly List<int> _indexes = new();
         private readonly List<UIBaseWindow> _activeWindowsQueue = new();
         private readonly Queue<UIBaseWindow> _toOpenWindowsQueue = new();
-
-        public event Action<string> OnWindowAdded;
-        public event Action<string> OnWindowRemoved;
+        
         public event Action<UIBaseWindow> OnWindowOpened;
         public event Action<UIBaseWindow> OnWindowClosed;
 
@@ -36,7 +34,7 @@ namespace UISystem
         public async UniTask<T> GetWindowAsync<T>(string nameId) where T : UIBaseWindow
         {
             if (HasWindow(nameId))
-                return _dict[nameId] as T;
+                return _loadedWindows[nameId] as T;
 
             var (prefab, index) = await _popupDatabase.GetWindowAsync<T>(nameId);
             return LoadWindowByPrefab(prefab, true, index);
@@ -45,7 +43,7 @@ namespace UISystem
         public T GetWindow<T>(string nameId) where T : UIBaseWindow
         {
             if (HasWindow(nameId))
-                return _dict[nameId] as T;
+                return _loadedWindows[nameId] as T;
 
             var prefab = _popupDatabase.GetWindow<T>(nameId);
             return LoadWindowByPrefab(prefab.Item1, true, prefab.Item2);
@@ -69,20 +67,17 @@ namespace UISystem
             return window;
         }
 
-        private bool HasWindow(string nameId) => _dict.ContainsKey(nameId);
+        private bool HasWindow(string nameId) => _loadedWindows.ContainsKey(nameId);
 
         private void AddWindow(UIBaseWindow window)
         {
-            _dict.Add(window.NameId, window);
+            _loadedWindows.Add(window.NameId, window);
             window.CreateWindow(this);
-            OnWindowAdded?.Invoke(window.NameId);
         }
 
         public void RemoveWindow(UIBaseWindow window)
         {
-            OnWindowRemoved?.Invoke(window.NameId);
-
-            _dict.Remove(window.NameId);
+            _loadedWindows.Remove(window.NameId);
             if (AnimationController != null)
             {
                 AnimationController.RemoveWindowAnimation(window);
@@ -143,30 +138,7 @@ namespace UISystem
         {
             for (int i = _activeWindowsQueue.Count - 1; i >= 0; i--)
             {
-                var lastWindow = _activeWindowsQueue[i];
-                if (!(lastWindow is IUIDisableAutoClose))
-                    lastWindow.CloseWindow();
-            }
-        }
-
-        public void AutoCloseAllWindow<T>()
-        {
-            for (int i = _activeWindowsQueue.Count - 1; i >= 0; i--)
-            {
-                var lastWindow = _activeWindowsQueue[i];
-                if (!(lastWindow is IUIDisableAutoClose) && lastWindow is not T)
-                    lastWindow.CloseWindow();
-            }
-        }
-
-        public void ForEach<T>(Action<T> action) where T : class
-        {
-            foreach (var window in _dict.Values)
-            {
-                if (window is T w)
-                {
-                    action?.Invoke(w);
-                }
+                _activeWindowsQueue[i].CloseWindow();
             }
         }
 

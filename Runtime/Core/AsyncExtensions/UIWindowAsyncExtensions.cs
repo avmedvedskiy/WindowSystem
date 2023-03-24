@@ -3,22 +3,22 @@ using UISystem;
 
 public static class UIWindowAsyncExtensions
 {
-    public static async UniTask OpenWindowAsync(this UIBaseWindow window)
+    public static UniTask OpenWindowAsync(this UIBaseWindow window)
     {
         window.OpenWindow();
-        await UniTask.WaitUntil(window.IsWindowCompletelyOpen);
+        return UniTask.WaitUntil(window.IsWindowCompletelyOpen);
     }
 
-    public static async UniTask OpenWindowInQueueAsync(this UIBaseWindow window)
+    public static UniTask OpenWindowInQueueAsync(this UIBaseWindow window)
     {
         window.OpenWindowInQueue();
-        await UniTask.WaitUntil(window.IsWindowCompletelyOpen);
+        return UniTask.WaitUntil(window.IsWindowCompletelyOpen);
     }
 
-    public static async UniTask CloseWindowAsync(this UIBaseWindow window)
+    public static UniTask CloseWindowAsync(this UIBaseWindow window)
     {
         window.CloseWindow();
-        await UniTask.WaitUntil(window.IsWindowCompletelyClosed);
+        return UniTask.WaitUntil(window.IsWindowCompletelyClosed);
     }
 
     public static async UniTask<T> GetAndOpenWindowAsync<T>(this UIMainController controller, string windowId,
