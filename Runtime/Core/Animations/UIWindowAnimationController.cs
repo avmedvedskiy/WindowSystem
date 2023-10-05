@@ -6,7 +6,7 @@ namespace UISystem
 {
     public class UIWindowAnimationController : MonoBehaviour
     {
-        private readonly List<UIBaseWindow> _animatedWindows = new(); //TODO: clear on scene switch
+        private readonly List<UIBaseWindow> _animatedWindows = new(); 
         private readonly List<UIBaseWindow> _stoppedAnimations = new();
 
 

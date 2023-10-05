@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.AddressableAssets;
@@ -20,49 +19,27 @@ namespace UISystem
         [SerializeField] private string _nameId;
         [SerializeField] private WindowState _currentState = WindowState.Closed;
 
-        /// <summary>
-        /// Window will not be added to Queue
-        /// </summary>
         [Tooltip("Window will not be added to Queue")] [SerializeField]
         private bool _preventQueue;
 
-        /// <summary>
-        /// Window does not react to Escape
-        /// </summary>
         [Tooltip("Window does not react to Escape")] [SerializeField]
         private bool _preventEscape;
 
         [SerializeField] private UIBaseWindowAnimation _windowAnimation;
 
-        public event Action<WindowState> OnCurrentWindowState;
-
-        public WindowState CurrentWindowState
-        {
-            get => _currentState;
-            set
-            {
-                if (value != _currentState)
-                {
-                    _currentState = value;
-                    OnCurrentWindowState?.Invoke(_currentState);
-                }
-            }
-        }
 
         public string NameId => _nameId;
         public bool PreventQueue => _preventQueue;
         public bool PreventEscape => _preventEscape;
-
+        
+        public WindowState CurrentWindowState
+        {
+            get => _currentState;
+            private set => _currentState = value;
+        }
+        
         public UIBaseWindowAnimation WindowAnimation => _windowAnimation;
 
-        public event Action OnWindowOpen;
-        public event Action OnWindowClosed;
-
-        public void SwitchWindow()
-        {
-            Controller.AutoCloseAllWindow();
-            OpenWindow();
-        }
 
         [ContextMenu("OpenWindow")]
         public virtual void OpenWindow()
@@ -83,7 +60,6 @@ namespace UISystem
             }
 
             Controller.ReportOpen(this);
-            OnWindowOpen?.Invoke();
         }
 
         [ContextMenu("OpenWindowInQueue")]
@@ -107,7 +83,6 @@ namespace UISystem
                 }
 
                 Controller.ReportClose(this);
-                OnWindowClosed?.Invoke();
             }
         }
 
@@ -146,7 +121,6 @@ namespace UISystem
             }
 
             Controller.ReportOpen(this);
-            OnWindowOpen?.Invoke();
         }
 
         public bool IsWindowCompletelyOpen() => _currentState == WindowState.Open;
