@@ -5,7 +5,7 @@ namespace UISystem
 {
     public class BaseWindow<TPayload> : MonoBehaviour, IOpenedWindow<TPayload>
     {
-        [SerializeField] private WindowAnimation _windowAnimation;
+        [SerializeField] private BaseWindowAnimation _windowAnimation;
         public IWindowAnimation Animation => _windowAnimation;
 
         public virtual UniTask OpenAsync(TPayload payload = default) => Animation.OpenAnimation();
@@ -14,7 +14,7 @@ namespace UISystem
 
         private void OnValidate()
         {
-            _windowAnimation ??= GetComponent<WindowAnimation>();
+            _windowAnimation ??= GetComponent<BaseWindowAnimation>();
         }
     }
 }

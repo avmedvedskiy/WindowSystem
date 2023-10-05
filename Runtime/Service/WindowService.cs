@@ -12,25 +12,35 @@ namespace UISystem
 
         private readonly Dictionary<string, IClosedWindow> _openedWindows = new();
         private readonly Queue<UniTaskCompletionSource> _queue = new();
-
-        public async UniTask<TWindow> OpenAsync<TWindow, TPayload>(string windowId, TPayload payload = default)
+        
+        public async UniTask<TWindow> OpenAsync<TWindow, TPayload>(string windowId, TPayload payload)
             where TWindow : IOpenedWindow<TPayload>
         {
-            if (HasWindow(windowId, out var existWindow))
-                return (TWindow)existWindow;
-
-            _openedWindows[windowId] = default; //запоминаем за собой ячейку, чтобы до загрузки уже работала очередь
-            var window = await _factory.InstantiateAsync<TWindow>(windowId, _root);
-            _openedWindows[windowId] = window;
+            var window = await GetWindowAsync<TWindow>(windowId);
             await window.OpenAsync(payload);
             return window;
         }
+        
+        public async UniTask<TWindow> OpenAsync<TWindow>(string windowId)
+            where TWindow : IOpenedWindow
+        {
+            var window = await GetWindowAsync<TWindow>(windowId);
+            await window.OpenAsync();
+            return window;
+        }
 
-        public async UniTask<TWindow> OpenInQueueAsync<TWindow, TPayload>(string windowId, TPayload payload = default)
+        public async UniTask<TWindow> OpenInQueueAsync<TWindow, TPayload>(string windowId, TPayload payload)
             where TWindow : IOpenedWindow<TPayload>
         {
             await WaitInQueue();
             return await OpenAsync<TWindow, TPayload>(windowId, payload);
+        }
+        
+        public async UniTask<TWindow> OpenInQueueAsync<TWindow>(string windowId)
+            where TWindow : IOpenedWindow
+        {
+            await WaitInQueue();
+            return await OpenAsync<TWindow>(windowId);
         }
         
         public async UniTask CloseAsync(string windowId)
@@ -43,6 +53,17 @@ namespace UISystem
             await window.CloseAsync();
             _factory.DestroyWindow(window);
             ProcessQueue();
+        }
+        
+        private async UniTask<TWindow> GetWindowAsync<TWindow>(string windowId) where TWindow : IClosedWindow
+        {
+            if (HasWindow(windowId, out var existWindow))
+                return (TWindow)existWindow;
+            
+            _openedWindows[windowId] = default; //запоминаем за собой ячейку, чтобы до загрузки уже работала очередь
+            var window = await _factory.InstantiateAsync<TWindow>(windowId, _root);
+            _openedWindows[windowId] = window;
+            return window;
         }
 
         private UniTask WaitInQueue()

@@ -5,19 +5,20 @@ using UnityEngine;
 namespace UISystem
 {
     [RequireComponent(typeof(Animation))]
-    public class WindowAnimation : MonoBehaviour, IWindowAnimation
+    public class WindowAnimation : BaseWindowAnimation
     {
         [SerializeField] private Animation _animation;
-        [SerializeField] private string _openAnimation;
-        [SerializeField] private string _closeAnimation;
+        [SerializeField] private string _openAnimation = "Open";
+        [SerializeField] private string _closeAnimation= "Close";
 
-        UniTask IWindowAnimation.OpenAnimation()
+
+        public override UniTask OpenAnimation()
         {
             _animation.Play(_openAnimation);
             return UniTask.WaitWhile(() => _animation.isPlaying);
         }
-
-        UniTask IWindowAnimation.CloseAnimation()
+        
+        public override UniTask CloseAnimation()
         {
             _animation.Play(_closeAnimation);
             return UniTask.WaitWhile(() => _animation.isPlaying);
