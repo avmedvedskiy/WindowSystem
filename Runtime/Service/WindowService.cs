@@ -14,7 +14,7 @@ namespace UISystem
         private readonly Queue<UniTaskCompletionSource> _queue = new();
         
         public async UniTask<TWindow> OpenAsync<TWindow, TPayload>(string windowId, TPayload payload)
-            where TWindow : IOpenedWindow<TPayload>
+            where TWindow : IPayloadWindow<TPayload>
         {
             var window = await GetWindowAsync<TWindow>(windowId);
             await window.OpenAsync(payload);
@@ -22,7 +22,7 @@ namespace UISystem
         }
         
         public async UniTask<TWindow> OpenAsync<TWindow>(string windowId)
-            where TWindow : IOpenedWindow
+            where TWindow : IWindow
         {
             var window = await GetWindowAsync<TWindow>(windowId);
             await window.OpenAsync();
@@ -30,14 +30,14 @@ namespace UISystem
         }
 
         public async UniTask<TWindow> OpenInQueueAsync<TWindow, TPayload>(string windowId, TPayload payload)
-            where TWindow : IOpenedWindow<TPayload>
+            where TWindow : IPayloadWindow<TPayload>
         {
             await WaitInQueue();
             return await OpenAsync<TWindow, TPayload>(windowId, payload);
         }
         
         public async UniTask<TWindow> OpenInQueueAsync<TWindow>(string windowId)
-            where TWindow : IOpenedWindow
+            where TWindow : IWindow
         {
             await WaitInQueue();
             return await OpenAsync<TWindow>(windowId);

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace UISystem
 {
-    public class BaseWindow<TPayload> : MonoBehaviour, IOpenedWindow<TPayload>
+    public class BaseWindow<TPayload> : MonoBehaviour, IPayloadWindow<TPayload>
     {
         [SerializeField] private BaseWindowAnimation _windowAnimation;
         public IWindowAnimation Animation => _windowAnimation;
