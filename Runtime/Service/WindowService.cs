@@ -5,7 +5,18 @@ using UnityEngine;
 
 namespace UISystem
 {
-    public class WindowService : MonoBehaviour
+    public interface IWindowService
+    {
+        UniTask<TWindow> OpenAsync<TWindow, TPayload>(string windowId, TPayload payload)
+            where TWindow : IPayloadWindow<TPayload>;
+        UniTask<TWindow> OpenAsync<TWindow>(string windowId)
+            where TWindow : IWindow;
+        UniTask<TWindow> OpenInQueueAsync<TWindow, TPayload>(string windowId, TPayload payload)
+            where TWindow : IPayloadWindow<TPayload>;
+        UniTask<TWindow> OpenInQueueAsync<TWindow>(string windowId) where TWindow : IWindow;
+        UniTask CloseAsync(string windowId);
+    }
+    public class WindowService : MonoBehaviour, IWindowService
     {
         [SerializeField] private WindowFactory _factory;
         [SerializeField] private Transform _root;

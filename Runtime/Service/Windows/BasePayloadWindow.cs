@@ -3,12 +3,11 @@ using UnityEngine;
 
 namespace UISystem
 {
-    [RequireComponent(typeof(BaseWindowAnimation))]
-    public abstract class BaseWindow : MonoBehaviour, IWindow
+    public abstract class BasePayloadWindow<TPayload> : MonoBehaviour, IPayloadWindow<TPayload>
     {
         [SerializeField] private BaseWindowAnimation _windowAnimation;
 
-        public virtual UniTask OpenAsync() => _windowAnimation.OpenAnimation();
+        public virtual UniTask OpenAsync(TPayload payload) => _windowAnimation.OpenAnimation();
 
         public virtual UniTask CloseAsync() => _windowAnimation.CloseAnimation();
 
