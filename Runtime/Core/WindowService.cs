@@ -5,17 +5,6 @@ using UnityEngine;
 
 namespace UISystem
 {
-    public interface IWindowService
-    {
-        UniTask<TWindow> OpenAsync<TWindow, TPayload>(string windowId, TPayload payload)
-            where TWindow : IPayloadWindow<TPayload>;
-        UniTask<TWindow> OpenAsync<TWindow>(string windowId)
-            where TWindow : IWindow;
-        UniTask<TWindow> OpenInQueueAsync<TWindow, TPayload>(string windowId, TPayload payload)
-            where TWindow : IPayloadWindow<TPayload>;
-        UniTask<TWindow> OpenInQueueAsync<TWindow>(string windowId) where TWindow : IWindow;
-        UniTask CloseAsync(string windowId);
-    }
     public class WindowService : MonoBehaviour, IWindowService
     {
         [SerializeField] private WindowFactory _factory;
@@ -24,34 +13,19 @@ namespace UISystem
         private readonly Dictionary<string, IClosedWindow> _openedWindows = new();
         private readonly Queue<UniTaskCompletionSource> _queue = new();
         
-        public async UniTask<TWindow> OpenAsync<TWindow, TPayload>(string windowId, TPayload payload)
-            where TWindow : IPayloadWindow<TPayload>
+        public async UniTask<TWindow> OpenAsync<TWindow, TPayload>(string windowId, TPayload payload = default)
+            where TWindow : IWindow<TPayload>
         {
             var window = await GetWindowAsync<TWindow>(windowId);
             await window.OpenAsync(payload);
             return window;
         }
-        
-        public async UniTask<TWindow> OpenAsync<TWindow>(string windowId)
-            where TWindow : IWindow
-        {
-            var window = await GetWindowAsync<TWindow>(windowId);
-            await window.OpenAsync();
-            return window;
-        }
 
-        public async UniTask<TWindow> OpenInQueueAsync<TWindow, TPayload>(string windowId, TPayload payload)
-            where TWindow : IPayloadWindow<TPayload>
+        public async UniTask<TWindow> OpenInQueueAsync<TWindow, TPayload>(string windowId, TPayload payload = default)
+            where TWindow : IWindow<TPayload>
         {
             await WaitInQueue();
             return await OpenAsync<TWindow, TPayload>(windowId, payload);
-        }
-        
-        public async UniTask<TWindow> OpenInQueueAsync<TWindow>(string windowId)
-            where TWindow : IWindow
-        {
-            await WaitInQueue();
-            return await OpenAsync<TWindow>(windowId);
         }
         
         public async UniTask CloseAsync(string windowId)
@@ -74,6 +48,8 @@ namespace UISystem
             _openedWindows[windowId] = default; //запоминаем за собой ячейку, чтобы до загрузки уже работала очередь
             var window = await _factory.InstantiateAsync<TWindow>(windowId, _root);
             _openedWindows[windowId] = window;
+            window.Id = windowId;
+            window.Parent = this;
             return window;
         }
 
@@ -86,7 +62,7 @@ namespace UISystem
 
         private void ProcessQueue()
         {
-            if (!HasWindowsInQueue())
+            if (!HasWindowsInQueue() && _queue.Count > 0)
             {
                 var process = _queue.Dequeue();
                 process?.TrySetResult();
