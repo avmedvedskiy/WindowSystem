@@ -5,10 +5,12 @@ namespace UISystem
 {
     public interface IClosedWindow
     {
-        string Id { get; set; }
-        Status Status { get; set; }
-        IWindowService Parent { get; set; }
+        string Id { get;}
+        Status Status { get;}
+        IWindowService Parent { get;}
         GameObject gameObject { get; }
         UniTask CloseAsync();
+        internal void SetStatus(Status status);
+        internal void Initialize(string id, IWindowService parent);
     }
 }

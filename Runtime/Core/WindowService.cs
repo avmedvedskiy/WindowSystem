@@ -19,7 +19,9 @@ namespace UISystem
             where TWindow : IWindow<TPayload>
         {
             var window = await GetWindowAsync<TWindow>(windowId);
+            window.SetStatus(Status.Opening);
             await window.OpenAsync(payload);
+            window.SetStatus(Status.Opened);
             return window;
         }
 
@@ -37,7 +39,9 @@ namespace UISystem
             
             var window = _openedWindows[windowId];
             _openedWindows.Remove(windowId);
+            window.SetStatus(Status.Closing);
             await window.CloseAsync();
+            window.SetStatus(Status.Closed);
             _factory.DestroyWindow(window);
             ProcessQueue();
         }
@@ -50,8 +54,7 @@ namespace UISystem
             _openedWindows[windowId] = default; //запоминаем за собой ячейку, чтобы до загрузки уже работала очередь
             var window = await _factory.InstantiateAsync<TWindow>(windowId, _root);
             _openedWindows[windowId] = window;
-            window.Id = windowId;
-            window.Parent = this;
+            window.Initialize(windowId, this);
             return window;
         }
 

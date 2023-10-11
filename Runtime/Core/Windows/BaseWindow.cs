@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
@@ -5,43 +6,31 @@ namespace UISystem
 {
     public abstract class BaseWindow<TPayload> : MonoBehaviour, IWindow<TPayload>
     {
+        public string Id { get; private set; }
+        public Status Status { get; private set; }
+        public IWindowService Parent { get; private set; }
+        
         [SerializeField] private BaseWindowAnimation _windowAnimation;
-        public string Id { get; set; }
-        public Status Status { get; set; }
+        
+        UniTask IWindow<TPayload>.OpenAsync(TPayload payload) => OpenAsync(payload);
+        UniTask IClosedWindow.CloseAsync() => CloseAsync();
 
-        private IWindowService _parent;
-        IWindowService IClosedWindow.Parent
-        {
-            get => _parent;
-            set => _parent = value;
-        }
-
-        async UniTask IWindow<TPayload>.OpenAsync(TPayload payload)
-        {
-            Status = Status.Opening;
-            await OpenAsync(payload);
-            Status = Status.Opened;
-        }
-
-        async UniTask IClosedWindow.CloseAsync()
-        {
-            Status = Status.Closing;
-            await CloseAsync();
-            Status = Status.Closed;
-        } 
         protected virtual UniTask OpenAsync(TPayload payload) => _windowAnimation.OpenAnimation();
         protected virtual UniTask CloseAsync() => _windowAnimation.CloseAnimation();
 
-        public void CloseWindow()
-        {
-            _parent
+        public void CloseWindow() =>
+            Parent
                 .CloseAsync(Id)
                 .Forget();
-        }
-        
-        private void OnValidate()
+
+        private void OnValidate() => _windowAnimation ??= GetComponent<BaseWindowAnimation>();
+
+        void IClosedWindow.SetStatus(Status status) => Status = status;
+
+        void IClosedWindow.Initialize(string id,IWindowService parent)
         {
-            _windowAnimation ??= GetComponent<BaseWindowAnimation>();
+            Id = id;
+            Parent = parent;
         }
     }
 }

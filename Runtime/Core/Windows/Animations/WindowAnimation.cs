@@ -11,7 +11,6 @@ namespace UISystem
         [SerializeField] private string _openAnimation = "Open";
         [SerializeField] private string _closeAnimation= "Close";
 
-
         public override UniTask OpenAnimation()
         {
             _animation.Play(_openAnimation);
@@ -24,9 +23,6 @@ namespace UISystem
             return UniTask.WaitWhile(() => _animation.isPlaying);
         }
 
-        private void OnValidate()
-        {
-            _animation ??= GetComponent<Animation>();
-        }
+        private void OnValidate() => _animation ??= GetComponent<Animation>();
     }
 }
