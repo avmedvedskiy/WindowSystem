@@ -11,13 +11,13 @@ namespace UISystem
         [SerializeField] private string _openAnimation = "Open";
         [SerializeField] private string _closeAnimation= "Close";
 
-        public override UniTask OpenAnimation()
+        public override UniTask OpenAnimationAsync()
         {
             _animation.Play(_openAnimation);
             return UniTask.WaitWhile(() => _animation.isPlaying);
         }
         
-        public override UniTask CloseAnimation()
+        public override UniTask CloseAnimationAsync()
         {
             _animation.Play(_closeAnimation);
             return UniTask.WaitWhile(() => _animation.isPlaying);

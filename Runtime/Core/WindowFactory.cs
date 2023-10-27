@@ -4,7 +4,7 @@ using UnityEngine.AddressableAssets;
 
 namespace UISystem
 {
-    public class WindowFactory : MonoBehaviour
+    public class WindowFactory : MonoBehaviour, IWindowFactory
     {
         public async UniTask<TWindow> InstantiateAsync<TWindow>(string windowId, Transform root)
         {

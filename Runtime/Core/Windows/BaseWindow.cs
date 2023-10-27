@@ -12,11 +12,11 @@ namespace UISystem
         
         [SerializeField] private BaseWindowAnimation _windowAnimation;
         
-        UniTask IWindow<TPayload>.OpenAsync(TPayload payload) => OpenAsync(payload);
-        UniTask IClosedWindow.CloseAsync() => CloseAsync();
+        UniTask IWindow<TPayload>.OpenAsync(TPayload payload) => OnOpenAsync(payload);
+        UniTask IClosedWindow.CloseAsync() => OnCloseAsync();
 
-        protected virtual UniTask OpenAsync(TPayload payload) => _windowAnimation.OpenAnimation();
-        protected virtual UniTask CloseAsync() => _windowAnimation.CloseAnimation();
+        protected virtual UniTask OnOpenAsync(TPayload payload) => _windowAnimation.OpenAnimationAsync();
+        protected virtual UniTask OnCloseAsync() => _windowAnimation.CloseAnimationAsync();
 
         public void CloseWindow() =>
             Parent

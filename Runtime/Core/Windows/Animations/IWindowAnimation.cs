@@ -4,7 +4,7 @@ namespace UISystem
 {
     public interface IWindowAnimation
     {
-        UniTask OpenAnimation();
-        UniTask CloseAnimation();
+        UniTask OpenAnimationAsync();
+        UniTask CloseAnimationAsync();
     }
 }

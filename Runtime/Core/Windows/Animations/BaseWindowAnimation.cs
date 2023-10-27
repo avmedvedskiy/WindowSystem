@@ -5,7 +5,7 @@ namespace UISystem
 {
     public abstract class BaseWindowAnimation : MonoBehaviour, IWindowAnimation
     {
-        public abstract UniTask OpenAnimation();
-        public abstract UniTask CloseAnimation();
+        public abstract UniTask OpenAnimationAsync();
+        public abstract UniTask CloseAnimationAsync();
     }
 }
