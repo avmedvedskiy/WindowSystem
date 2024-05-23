@@ -14,7 +14,8 @@ namespace UISystem
         private readonly Dictionary<string, IClosedWindow> _openedWindows = new();
         private readonly Queue<UniTaskCompletionSource> _queue = new();
 
-        
+        public Transform Root => _root;
+
         public async UniTask<TWindow> OpenAsync<TWindow, TPayload>(string windowId, TPayload payload = default)
             where TWindow : IWindow<TPayload>
         {
