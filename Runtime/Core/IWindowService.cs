@@ -8,7 +8,7 @@ namespace UISystem
         Transform Root { get; }
         UniTask<TWindow> OpenAsync<TWindow, TPayload>(string windowId, TPayload payload = default)
             where TWindow : IWindow<TPayload>;
-        UniTask<TWindow> OpenInQueueAsync<TWindow, TPayload>(string windowId, TPayload payload)
+        UniTask<TWindow> OpenInQueueAsync<TWindow, TPayload>(string windowId, TPayload payload = default)
             where TWindow : IWindow<TPayload>;
         UniTask CloseAsync(string windowId);
     }

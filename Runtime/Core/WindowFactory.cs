@@ -14,5 +14,17 @@ namespace UISystem
 
         public void DestroyWindow(IClosedWindow window)
             => Addressables.ReleaseInstance(window.gameObject);
+        
+        /*
+         *
+         var go = (await Addressables
+                .LoadAssetsAsync<GameObject>(
+                    new List<string> { windowId, skin },
+                    null,
+                    Addressables.MergeMode.Intersection)
+                .ToUniTask())
+            .FirstOrDefault();
+         * 
+         */
     }
 }

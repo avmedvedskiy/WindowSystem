@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
@@ -68,17 +66,21 @@ namespace UISystem
 
         private void ProcessQueue()
         {
-            if (!HasWindowsInQueue() && _queue.Count > 0)
+            if (HasOpenedWindows() == false && HasWindowsInQueue())
             {
-                var process = _queue.Dequeue();
-                process?.TrySetResult();
+                _queue
+                    .Dequeue()
+                    .TrySetResult();
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool HasWindowsInQueue() => _openedWindows.Count != 0;
+        private bool HasWindowsInQueue()
+        {
+            return _queue.Count > 0;
+        }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private bool HasOpenedWindows() => _openedWindows.Count != 0;
+
         private bool HasWindow(string windowId, out IClosedWindow window) =>
             _openedWindows.TryGetValue(windowId, out window);
 
