@@ -10,6 +10,7 @@ namespace UISystem
             where TWindow : IWindow<TPayload>;
         UniTask<TWindow> OpenInQueueAsync<TWindow, TPayload>(string windowId, TPayload payload = default)
             where TWindow : IWindow<TPayload>;
+        TWindow GetOpenedWindow<TWindow>(string windowId);
         UniTask CloseAsync(string windowId);
     }
 }

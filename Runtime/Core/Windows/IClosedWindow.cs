@@ -1,3 +1,4 @@
+using System;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
@@ -5,6 +6,7 @@ namespace UISystem
 {
     public interface IClosedWindow
     {
+        event Action<Status> OnStatusChanged;
         string Id { get;}
         Status Status { get;}
         IWindowService Parent { get;}

@@ -4,20 +4,29 @@ using UnityEngine;
 
 namespace UISystem
 {
-    public class WindowService : MonoBehaviour, IWindowService
+    public class WindowService : IWindowService
     {
-        [SerializeField] private WindowFactory _factory;
-        [SerializeField] private Transform _root;
+        private readonly IWindowFactory _windowFactory;
+        private readonly IWindowRootProvider _rootProvider;
 
         private readonly Dictionary<string, IClosedWindow> _openedWindows = new();
         private readonly Queue<UniTaskCompletionSource> _queue = new();
 
-        public Transform Root => _root;
+        public Transform Root => _rootProvider.Root;
+
+        public WindowService(IWindowFactory windowFactory, IWindowRootProvider rootProvider)
+        {
+            _windowFactory = windowFactory;
+            _rootProvider = rootProvider;
+        }
 
         public async UniTask<TWindow> OpenAsync<TWindow, TPayload>(string windowId, TPayload payload = default)
             where TWindow : IWindow<TPayload>
         {
-            var window = await GetWindowAsync<TWindow>(windowId);
+            if (HasWindow(windowId, out var result))
+                return (TWindow)result;
+            
+            var window = await CreateNewWindow<TWindow>(windowId);
             window.SetStatus(Status.Opening);
             await window.OpenAsync(payload);
             window.SetStatus(Status.Opened);
@@ -30,7 +39,14 @@ namespace UISystem
             await WaitInQueue();
             return await OpenAsync<TWindow, TPayload>(windowId, payload);
         }
-        
+
+        public TWindow GetOpenedWindow<TWindow>(string windowId)
+        {
+            if (HasWindow(windowId, out var window))
+                return (TWindow)window;
+            return default;
+        }
+
         public async UniTask CloseAsync(string windowId)
         {
             if(!HasWindow(windowId, out _))
@@ -41,17 +57,14 @@ namespace UISystem
             window.SetStatus(Status.Closing);
             await window.CloseAsync();
             window.SetStatus(Status.Closed);
-            _factory.DestroyWindow(window);
+            _windowFactory.DestroyWindow(window);
             ProcessQueue();
         }
         
-        private async UniTask<TWindow> GetWindowAsync<TWindow>(string windowId) where TWindow : IClosedWindow
+        private async UniTask<TWindow> CreateNewWindow<TWindow>(string windowId) where TWindow : IClosedWindow
         {
-            if (HasWindow(windowId, out var existWindow))
-                return (TWindow)existWindow;
-            
             _openedWindows[windowId] = default; //запоминаем за собой ячейку, чтобы до загрузки уже работала очередь
-            var window = await _factory.InstantiateAsync<TWindow>(windowId, _root);
+            var window = await _windowFactory.InstantiateAsync<TWindow>(windowId, _rootProvider.Root);
             _openedWindows[windowId] = window;
             window.Initialize(windowId, this);
             return window;
@@ -84,10 +97,5 @@ namespace UISystem
         private bool HasWindow(string windowId, out IClosedWindow window) =>
             _openedWindows.TryGetValue(windowId, out window);
 
-        private void OnValidate()
-        {
-            _root ??= transform;
-            _factory ??= GetComponent<WindowFactory>();
-        }
     }
 }
