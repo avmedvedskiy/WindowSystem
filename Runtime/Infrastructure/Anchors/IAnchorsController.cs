@@ -7,7 +7,7 @@ namespace UISystem
     /// </summary>
     public interface IAnchorsController
     {
-        void OverrideDefaultAnchorsView(IDefaultAnchorsProvider defaultAnchorsProvider);
+        void OverrideDefaultAnchorsView(IFallbackAnchorsProvider fallbackAnchorsProvider);
         UniTask<IAnchor> ShowAnchor(int id);
         UniTask HideAnchor(int id);
     }

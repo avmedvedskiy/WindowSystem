@@ -5,7 +5,7 @@ namespace UISystem
     public class AnchorsController : IAnchorsController
     {
         private readonly IAnchorsProvider _anchorsProvider;
-        private IDefaultAnchorsProvider _defaultAnchorsProvider = new NullDefaultAnchorsProvider();
+        private IFallbackAnchorsProvider _fallbackAnchorsProvider = new NullFallbackAnchorsProvider();
 
         public AnchorsController(IAnchorsProvider anchorsProvider)
         {
@@ -13,16 +13,16 @@ namespace UISystem
         }
 
         /// <summary>
-        /// Useful for late binding, load default anchors from addressables and set here
+        /// Useful for late binding, load fallback anchors from addressables and set here
         /// </summary>
-        public void OverrideDefaultAnchorsView(IDefaultAnchorsProvider defaultAnchorsProvider)
+        public void OverrideDefaultAnchorsView(IFallbackAnchorsProvider fallbackAnchorsProvider)
         {
-            _defaultAnchorsProvider = defaultAnchorsProvider;
+            _fallbackAnchorsProvider = fallbackAnchorsProvider;
         }
 
         public async UniTask<IAnchor> ShowAnchor(int id)
         {
-            var anchor = _anchorsProvider.GetAnchor(id) ?? _defaultAnchorsProvider.GetAnchor(id);
+            var anchor = _anchorsProvider.GetAnchor(id) ?? _fallbackAnchorsProvider.GetAnchor(id);
             if (anchor != null)
             {
                 await anchor.PlayOpenAnimation();
