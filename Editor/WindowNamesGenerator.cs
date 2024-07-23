@@ -32,7 +32,7 @@ namespace UISystem.Editor
                     namespace UISystem{{
                     public static class Windows {{
                     {
-                        $"{string.Join("\r\n", CreateWindowConstants(allWindows))}" + 
+                        $"{string.Join("\r\n", CreateWindowConstants(allWindows))}" +
                         "\r\n" +
                         $"{string.Join("\r\n", CreateWindowExtensionsMethods(allWindows))}"
                     }
@@ -49,15 +49,37 @@ namespace UISystem.Editor
 
         private static string ConvertToExtensionMethod(IClosedWindow window)
         {
+            return ImplementsGenericInterface(window.GetType(), typeof(IResultWindow<>))
+                ? ConvertResultWindow(window)
+                : ConvertDefaultWindow(window);
+        }
+
+        private static string ConvertResultWindow(IClosedWindow window)
+        {
+            var type = window.GetType();
+            var name = window.gameObject.name;
+            var resultType = GetInterface(type, typeof(IResultWindow<>));
+            var payloadDataType = GenericTypeArgumentDeep(type);
+            var resultDataType = GenericTypeArgumentDeep(resultType);
+            var constName = ConvertToConstantName(name);
+            return
+                $"public static UniTask<{resultDataType.FullName}> Open{name}Async(this IWindowService service, {payloadDataType.FullName} payload = default)" +
+                $"=> service.OpenPopup<{type.FullName}, {payloadDataType.FullName},{resultDataType.FullName}>({constName},payload);";
+        }
+
+        private static string ConvertDefaultWindow(IClosedWindow window)
+        {
             var type = window.GetType();
             var name = window.gameObject.name;
             var payloadDataType = GenericTypeArgumentDeep(type);
             var constName = ConvertToConstantName(name);
             return
-                $"public static UniTask<{type.FullName}> Open{name}Async(this IWindowService service, {payloadDataType.FullName} payload = default)" +
-                $"=> service.OpenAsync<{type.FullName}, {payloadDataType.FullName}>({constName},payload); \r\n" +
+                $"public static UniTask<{type.FullName}> Open{name}Async(this IWindowService service, {payloadDataType.FullName} payload = default, bool inQueue = false)" +
+                $"=> service.OpenAsync<{type.FullName}, {payloadDataType.FullName}>({constName},payload,inQueue); \r\n" +
+                
                 $"public static UniTask Close{name}Async(this IWindowService service) => service.CloseAsync({constName});";
         }
+        
 
         private static IEnumerable<string> CreateWindowConstants(List<IClosedWindow> allWindows)
         {
@@ -68,7 +90,7 @@ namespace UISystem.Editor
         }
 
 
-        static string ConvertToConstantName(string input) =>
+        private static string ConvertToConstantName(string input) =>
             string
                 .Join('_', Regex.Split(input, @"(?<!^)(?=[A-Z])"))
                 .ToUpper();
@@ -91,7 +113,7 @@ namespace UISystem.Editor
             return windows;
         }
 
-        public static Type GenericTypeArgumentDeep(Type type)
+        private static Type GenericTypeArgumentDeep(Type type)
         {
             if (type == null)
                 return null;
@@ -99,6 +121,19 @@ namespace UISystem.Editor
             return type.GenericTypeArguments.Length > 0
                 ? type.GenericTypeArguments[0]
                 : GenericTypeArgumentDeep(type.BaseType);
+        }
+
+        private static Type GetInterface(Type classType, Type genericInterfaceType)
+        {
+            return classType.GetInterfaces()
+                .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == genericInterfaceType);
+            ;
+        }
+
+        private static bool ImplementsGenericInterface(Type classType, Type genericInterfaceType)
+        {
+            return classType.GetInterfaces()
+                .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == genericInterfaceType);
         }
     }
 }

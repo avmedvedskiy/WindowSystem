@@ -20,9 +20,12 @@ namespace UISystem
             _rootProvider = rootProvider;
         }
 
-        public async UniTask<TWindow> OpenAsync<TWindow, TPayload>(string windowId, TPayload payload = default)
+        public async UniTask<TWindow> OpenAsync<TWindow, TPayload>(string windowId, TPayload payload = default, bool inQueue = false)
             where TWindow : IWindow<TPayload>
         {
+            if(inQueue)
+                await WaitInQueue();
+            
             if (HasWindow(windowId, out var result))
                 return (TWindow)result;
             
@@ -31,13 +34,6 @@ namespace UISystem
             await window.OpenAsync(payload);
             window.SetStatus(Status.Opened);
             return window;
-        }
-
-        public async UniTask<TWindow> OpenInQueueAsync<TWindow, TPayload>(string windowId, TPayload payload = default)
-            where TWindow : IWindow<TPayload>
-        {
-            await WaitInQueue();
-            return await OpenAsync<TWindow, TPayload>(windowId, payload);
         }
 
         public TWindow GetOpenedWindow<TWindow>(string windowId)

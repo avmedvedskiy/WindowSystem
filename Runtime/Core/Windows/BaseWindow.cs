@@ -10,10 +10,16 @@ namespace UISystem
         public string Id { get; private set; }
         public Status Status { get; private set; }
         public IWindowService Parent { get; private set; }
+        public TPayload Payload { get; private set; }
         
         [SerializeField] private BaseWindowAnimation _windowAnimation;
-        
-        UniTask IWindow<TPayload>.OpenAsync(TPayload payload) => OnOpenAsync(payload);
+
+        UniTask IWindow<TPayload>.OpenAsync(TPayload payload)
+        {
+            Payload = payload;
+            return OnOpenAsync(payload);
+        }
+
         UniTask IClosedWindow.CloseAsync() => OnCloseAsync();
 
         protected virtual UniTask OnOpenAsync(TPayload payload) => _windowAnimation.OpenAnimationAsync();
