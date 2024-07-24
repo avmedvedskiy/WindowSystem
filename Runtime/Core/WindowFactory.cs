@@ -6,14 +6,44 @@ namespace UISystem
 {
     public class WindowFactory : IWindowFactory
     {
+        private readonly WindowFactoryConfig _config;
+        private string _resourcesPath;
+        
+        public WindowFactory(WindowFactoryConfig config)
+        {
+            _config = config;
+        }
+        
         public async UniTask<TWindow> InstantiateAsync<TWindow>(string windowId, Transform root)
         {
-            var go = await Addressables.InstantiateAsync(windowId, root);
-            return go.GetComponent<TWindow>();
-        } 
+            if(_config.BuildInWindows.Contains(windowId))
+                return await InstantiateFromResources<TWindow>(windowId, root);
+            return await InstantiateFromAddressable<TWindow>(windowId, root);
+        }
 
         public void DestroyWindow(IClosedWindow window)
-            => Addressables.ReleaseInstance(window.gameObject);
+        {
+            var result = Addressables.ReleaseInstance(window.gameObject);
+            if (result == false)
+            {
+                Object.Destroy(window.gameObject);
+            }
+        }
+
+        private async UniTask<TWindow> InstantiateFromResources<TWindow>(string windowId, Transform root)
+        {
+            var asset = await Resources.LoadAsync<GameObject>($"{_config.FolderName}/{windowId}").ToUniTask();
+            var go = (GameObject)Object.Instantiate(asset,root);
+            return go.GetComponent<TWindow>();
+        }
+
+        private async UniTask<TWindow> InstantiateFromAddressable<TWindow>(string windowId, Transform root)
+        {
+            var go = await Addressables
+                .InstantiateAsync(windowId, root)
+                .ToUniTask();
+            return go.GetComponent<TWindow>();
+        }
         
         /*
          *
