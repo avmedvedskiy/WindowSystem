@@ -8,13 +8,12 @@ namespace UISystem
     /// </summary>
     public interface IAnchor
     {
-        int Id { get; }
+        bool EqualId(int id);
         Transform Position { get; }
         bool Static { get; set; }
         GameObject gameObject { get; }
 
         public UniTask PlayOpenAnimation();
-
         public UniTask PlayCloseAnimation();
     }
 }

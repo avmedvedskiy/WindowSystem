@@ -13,22 +13,22 @@ namespace UISystem
             return null;
         }
 
-        public void AddAnchor(IAnchor anchor)
+        public void AddAnchor(int id,IAnchor anchor)
         {
             if (anchor == null)
                 return;
 
-            if (!_anchors.ContainsKey(anchor.Id))
+            if (!_anchors.ContainsKey(id))
             {
-                _anchors.Add(anchor.Id, new List<IAnchor>());
+                _anchors.Add(id, new List<IAnchor>());
             }
 
-            _anchors[anchor.Id].Add(anchor);
+            _anchors[id].Add(anchor);
         }
 
-        public void RemoveAnchor(IAnchor anchor)
+        public void RemoveAnchor(int id,IAnchor anchor)
         {
-            if ( _anchors.TryGetValue(anchor.Id, out var list))
+            if ( _anchors.TryGetValue(id, out var list))
             {
                 list.Remove(anchor);
             }

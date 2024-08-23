@@ -6,7 +6,7 @@
     public interface IAnchorsProvider
     {
         IAnchor GetAnchor(int id);
-        void AddAnchor(IAnchor anchor);
-        void RemoveAnchor(IAnchor anchor);
+        void AddAnchor(int id,IAnchor anchor);
+        void RemoveAnchor(int id,IAnchor anchor);
     }
 }
