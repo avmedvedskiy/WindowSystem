@@ -5,7 +5,6 @@ using UnityEngine;
 
 public class DefaultFallbackAnchorsObject : MonoBehaviour,IFallbackAnchorsProvider
 {
-    [SerializeField] private MonoBehaviour _fallbackAnchor;
     private List<IAnchor> _anchorElements;
     
     private void Awake()
@@ -25,6 +24,6 @@ public class DefaultFallbackAnchorsObject : MonoBehaviour,IFallbackAnchorsProvid
             if (anchorElement.EqualId(id))
                 return anchorElement;
         }
-        return _fallbackAnchor as IAnchor;
+        return null;
     }
 }
