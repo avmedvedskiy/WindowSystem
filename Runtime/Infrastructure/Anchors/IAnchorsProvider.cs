@@ -5,8 +5,13 @@
     /// </summary>
     public interface IAnchorsProvider
     {
-        IAnchor GetAnchor(int id);
+        bool TryGetAnchor(int id, out IAnchor anchor);
         void AddAnchor(int id,IAnchor anchor);
         void RemoveAnchor(int id,IAnchor anchor);
+
+        /// <summary>
+        /// Useful for late binding, load fallback anchors from addressables and set here
+        /// </summary>
+        void OverrideDefaultAnchorsView(IFallbackAnchorsProvider fallbackAnchorsProvider);
     }
 }

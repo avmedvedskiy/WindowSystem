@@ -4,12 +4,12 @@ namespace UISystem
 {
     public class WindowFlyRootProvider : IFlyRootProvider
     {
-        private readonly IWindowRootProvider _rootProvider;
-        public Transform Root => _rootProvider.Root;
+        private readonly IWindowRootProvider _windowRootProvider;
+        public Transform Root => _windowRootProvider.Root;
 
-        public WindowFlyRootProvider(IWindowRootProvider rootProvider)
+        public WindowFlyRootProvider(IWindowRootProvider windowRootProvider)
         {
-            _rootProvider = rootProvider;
+            _windowRootProvider = windowRootProvider;
         }
 
     }

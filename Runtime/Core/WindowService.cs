@@ -7,17 +7,17 @@ namespace UISystem
     public class WindowService : IWindowService
     {
         private readonly IWindowFactory _windowFactory;
-        private readonly IWindowRootProvider _rootProvider;
+        private readonly IWindowRootProvider _windowRootProvider;
 
         private readonly Dictionary<string, IClosedWindow> _openedWindows = new();
         private readonly Queue<UniTaskCompletionSource> _queue = new();
 
-        public Transform Root => _rootProvider.Root;
+        public Transform Root => _windowRootProvider.Root;
 
-        public WindowService(IWindowFactory windowFactory, IWindowRootProvider rootProvider)
+        public WindowService(IWindowFactory windowFactory, IWindowRootProvider windowRootProvider)
         {
             _windowFactory = windowFactory;
-            _rootProvider = rootProvider;
+            _windowRootProvider = windowRootProvider;
         }
 
         public async UniTask<TWindow> OpenAsync<TWindow, TPayload>(string windowId, TPayload payload = default, bool inQueue = false)
@@ -60,7 +60,7 @@ namespace UISystem
         private async UniTask<TWindow> CreateNewWindow<TWindow>(string windowId) where TWindow : IClosedWindow
         {
             _openedWindows[windowId] = default; //запоминаем за собой ячейку, чтобы до загрузки уже работала очередь
-            var window = await _windowFactory.InstantiateAsync<TWindow>(windowId, _rootProvider.Root);
+            var window = await _windowFactory.InstantiateAsync<TWindow>(windowId, _windowRootProvider.Root);
             _openedWindows[windowId] = window;
             window.Initialize(windowId, this);
             return window;
