@@ -1,9 +1,0 @@
-﻿{
-  "name": "FlySystem.Runtime",
-  "references": [
-    "UniTask",
-    "UISystem.Runtime",
-    "UISystem.Fly.Runtime",
-    "UISystem.Anchors"
-  ]
-}

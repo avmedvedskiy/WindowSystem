@@ -3,7 +3,8 @@
     "rootNamespace": "",
     "references": [
         "UniTask",
-        "UISystem.Runtime"
+        "UISystem.Runtime",
+        "UISystem.Anchors"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
