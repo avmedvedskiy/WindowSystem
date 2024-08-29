@@ -1,0 +1,7 @@
+﻿{
+  "name": "UISystem.AnchorsProvider",
+  "references": [
+    "UniTask",
+    "UISystem.Runtime"
+  ]
+}

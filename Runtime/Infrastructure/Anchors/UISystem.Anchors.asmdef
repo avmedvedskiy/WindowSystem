@@ -1,6 +1,0 @@
-﻿{
-  "name": "UISystem.Anchors",
-  "references": [
-    "UniTask"
-  ]
-}

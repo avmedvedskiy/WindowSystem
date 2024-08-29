@@ -5,6 +5,10 @@
     /// </summary>
     public interface IAnchorsProvider
     {
+        /// <summary>
+        /// Set Singleton instance for link in mono components
+        /// </summary>
+        static IAnchorsProvider Current { get; set; }
         bool TryGetAnchor(int id, out IAnchor anchor);
         void AddAnchor(int id,IAnchor anchor);
         void RemoveAnchor(int id,IAnchor anchor);

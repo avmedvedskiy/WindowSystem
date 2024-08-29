@@ -4,7 +4,7 @@
     "references": [
         "UniTask",
         "UISystem.Runtime",
-        "UISystem.Anchors"
+        "UISystem.AnchorsProvider"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

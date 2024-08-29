@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
@@ -9,18 +10,22 @@ namespace UISystem
     {
         [SerializeField] private Animation _animation;
         [SerializeField] private string _openAnimation = "Open";
-        [SerializeField] private string _closeAnimation= "Close";
+        [SerializeField] private string _closeAnimation = "Close";
 
-        public override UniTask OpenAnimationAsync()
+        public override async UniTask OpenAnimationAsync(CancellationToken cancellationToken = default)
         {
             _animation.Play(_openAnimation);
-            return UniTask.WaitWhile(() => _animation.isPlaying);
+            await UniTask.WaitWhile(() => _animation.isPlaying, cancellationToken: cancellationToken);
+            if (cancellationToken.IsCancellationRequested)
+                _animation.Stop();
         }
-        
-        public override UniTask CloseAnimationAsync()
+
+        public override async UniTask CloseAnimationAsync(CancellationToken cancellationToken = default)
         {
             _animation.Play(_closeAnimation);
-            return UniTask.WaitWhile(() => _animation.isPlaying);
+            await UniTask.WaitWhile(() => _animation.isPlaying, cancellationToken: cancellationToken);
+            if (cancellationToken.IsCancellationRequested)
+                _animation.Stop();
         }
 
         private void OnValidate() => _animation ??= GetComponent<Animation>();

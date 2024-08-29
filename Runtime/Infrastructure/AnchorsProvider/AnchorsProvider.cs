@@ -6,7 +6,11 @@ namespace UISystem
     {
         private readonly Dictionary<int, List<IAnchor>> _anchors = new();
         private IFallbackAnchorsProvider _fallbackAnchorsProvider = new NullFallbackAnchorsProvider();
-        
+
+        public AnchorsProvider()
+        {
+            IAnchorsProvider.Current = this;
+        }
         
         /// <summary>
         /// Useful for late binding, load fallback anchors from addressables and set here

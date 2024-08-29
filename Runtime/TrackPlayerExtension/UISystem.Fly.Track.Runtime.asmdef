@@ -1,0 +1,29 @@
+{
+    "name": "UISystem.Fly.Track.Runtime",
+    "rootNamespace": "",
+    "references": [
+        "PlayableNodes.Core.Runtime",
+        "UISystem.Fly.Runtime",
+        "UniTask",
+        "UISystem.AnchorsProvider",
+        "UISystem.Runtime",
+        "UISystem.AnchorsProvider.Elements"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "PLAYABLENODES_ENABLED"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.avmedvedskiy.playblenodes.core",
+            "expression": "",
+            "define": "PLAYABLENODES_ENABLED"
+        }
+    ],
+    "noEngineReferences": false
+}
