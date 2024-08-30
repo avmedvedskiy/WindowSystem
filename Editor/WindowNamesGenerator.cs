@@ -24,6 +24,20 @@ namespace UISystem.Editor
 
         private static void OnCompilationFinished(string s, CompilerMessage[] compilerMessages)
         {
+            if (compilerMessages.Count(m => m.type == CompilerMessageType.Error) > 0)
+                return;
+
+            CreateGeneratedFile();
+        }
+
+        [MenuItem("Tools/Windows/GenerateSourceCode")]
+        private static void CreateFileAndCompile()
+        {
+            CreateGeneratedFile();
+            CompilationPipeline.RequestScriptCompilation();
+        }
+        private static void CreateGeneratedFile()
+        {
             var allWindows = FindAllWindows();
 
             string constantsFile =
