@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace UISystem
 {
@@ -13,6 +14,14 @@ namespace UISystem
 
             _rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,
                 _rectTransform.rect.width + SafeAreaManager.SafeRect.x * 2);
+            
+            _rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical,
+                _rectTransform.rect.height + SafeAreaManager.SafeRect.y * 2);
+        }
+
+        private void OnValidate()
+        {
+            _rectTransform ??= GetComponent<RectTransform>();
         }
     }
 }
