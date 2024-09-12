@@ -12,11 +12,9 @@ namespace UISystem
             if (_rectTransform == null)
                 _rectTransform = this.GetComponent<RectTransform>();
 
-            _rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,
-                _rectTransform.rect.width + SafeAreaManager.SafeRect.x * 2);
+            _rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Screen.width);
             
-            _rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical,
-                _rectTransform.rect.height + SafeAreaManager.SafeRect.y * 2);
+            _rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, Screen.height);
         }
 
         private void OnValidate()
