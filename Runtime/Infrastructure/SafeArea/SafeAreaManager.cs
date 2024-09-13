@@ -6,7 +6,9 @@ namespace UISystem
     public class SafeAreaManager : MonoBehaviour
     {
         public static Rect SafeRect { get; set; }
+        public static RectTransform ScreenRect { get; set; }
 
+        [SerializeField] private RectTransform _canvas;
         [SerializeField] private RectTransform _safeAreaRoot;
         [SerializeField] private bool _x = true;
         [SerializeField] private bool _y = true;
@@ -27,7 +29,6 @@ namespace UISystem
             safeArea.width = Screen.width - safeArea.x;
             safeArea.x /= 2;
 #endif
-            SafeRect = needRect;
 
             if (needRect.width != screenRect.width || needRect.height != screenRect.height)
             {
@@ -61,6 +62,8 @@ namespace UISystem
 
             _safeAreaRoot.anchorMin = anchorMin;
             _safeAreaRoot.anchorMax = anchorMax;
+            SafeRect = area;
+            ScreenRect = _canvas;
         }
     }
 }
