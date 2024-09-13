@@ -19,7 +19,7 @@ namespace UISystem.Editor
 
         static WindowNamesGenerator()
         {
-            CompilationPipeline.assemblyCompilationFinished += OnCompilationFinished;
+            //CompilationPipeline.assemblyCompilationFinished += OnCompilationFinished;
         }
 
         private static void OnCompilationFinished(string s, CompilerMessage[] compilerMessages)
@@ -77,7 +77,7 @@ namespace UISystem.Editor
             var resultDataType = GenericTypeArgumentDeep(resultType);
             var constName = ConvertToConstantName(name);
             return
-                $"public static UniTask<{resultDataType.FullName}> Open{name}Async(this IWindowService service, {payloadDataType.FullName} payload = default)" +
+                $"public static UniTask<{resultDataType.FullName}> OpenPopup{name}Async(this IWindowService service, {payloadDataType.FullName} payload = default)" +
                 $"=> service.OpenPopup<{type.FullName}, {payloadDataType.FullName},{resultDataType.FullName}>({constName},payload);";
         }
 
