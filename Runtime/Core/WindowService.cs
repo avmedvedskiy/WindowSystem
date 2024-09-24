@@ -26,10 +26,12 @@ namespace UISystem
             if(inQueue)
                 await WaitInQueue();
             
+            TWindow window;
             if (HasWindow(windowId, out var result))
-                return (TWindow)result;
-            
-            var window = await CreateNewWindow<TWindow>(windowId);
+                window = (TWindow)result;
+            else
+                window = await CreateNewWindow<TWindow>(windowId);
+
             window.SetStatus(Status.Opening);
             await window.OpenAsync(payload);
             window.SetStatus(Status.Opened);

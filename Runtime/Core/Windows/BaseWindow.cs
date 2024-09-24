@@ -11,7 +11,7 @@ namespace UISystem
         public Status Status { get; private set; }
         public IWindowService Parent { get; private set; }
         public TPayload Payload { get; private set; }
-        
+
         [SerializeField] private BaseWindowAnimation _windowAnimation;
 
         UniTask IWindow<TPayload>.OpenAsync(TPayload payload)
@@ -22,7 +22,11 @@ namespace UISystem
 
         UniTask IClosedWindow.CloseAsync() => OnCloseAsync();
 
-        protected virtual UniTask OnOpenAsync(TPayload payload) => _windowAnimation.OpenAnimationAsync();
+        protected virtual UniTask OnOpenAsync(TPayload payload) =>
+            Status != Status.Opened
+                ? _windowAnimation.OpenAnimationAsync()
+                : UniTask.CompletedTask;
+
         protected virtual UniTask OnCloseAsync() => _windowAnimation.CloseAnimationAsync();
 
         public void CloseWindow() =>
@@ -38,7 +42,7 @@ namespace UISystem
             OnStatusChanged?.Invoke(Status);
         }
 
-        void IClosedWindow.Initialize(string id,IWindowService parent)
+        void IClosedWindow.Initialize(string id, IWindowService parent)
         {
             Id = id;
             Parent = parent;
