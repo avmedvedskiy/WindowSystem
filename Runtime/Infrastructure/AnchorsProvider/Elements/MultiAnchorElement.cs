@@ -19,6 +19,7 @@ public class MultiAnchorElement : MonoBehaviour, IAnchor
     [SerializeField] private BaseWindowAnimation _animation;
 
     public virtual Transform Position => transform;
+    protected List<int> IDs => _ids;
 
     public bool Static
     {
