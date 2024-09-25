@@ -9,11 +9,23 @@ namespace UISystem
             return await window.Parent.OpenAsync<IWindow<TPayload>, TPayload>(window.Id, window.Payload, true);
         }
         
+        public static async UniTask<IWindow<TPayload>> Reopen<TPayload>(this IWindow<TPayload> window)
+        {
+            return await window.Parent.OpenAsync<IWindow<TPayload>, TPayload>(window.Id, window.Payload);
+        }
+        
         public static async UniTask AndWaitClose<TWindow>(this UniTask<TWindow> window)
             where TWindow : IClosedWindow
         {
             var w = await window;
             await UniTask.WaitWhile(() => w.Status != Status.Closed);
+        }
+        
+        public static async UniTask AndWaitClosing<TWindow>(this UniTask<TWindow> window)
+            where TWindow : IClosedWindow
+        {
+            var w = await window;
+            await UniTask.WaitWhile(() => w.Status != Status.Closing);
         }
 
         public static async UniTask<TResult> AndWaitResult<TWindow, TResult>(this UniTask<TWindow> window)
