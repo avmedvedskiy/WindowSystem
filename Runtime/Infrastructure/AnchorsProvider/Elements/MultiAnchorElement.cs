@@ -18,7 +18,7 @@ public class MultiAnchorElement : MonoBehaviour, IAnchor
     [SerializeField] private bool _static;
     [SerializeField] private BaseWindowAnimation _animation;
 
-    public Transform Position => transform;
+    public virtual Transform Position => transform;
 
     public bool Static
     {
