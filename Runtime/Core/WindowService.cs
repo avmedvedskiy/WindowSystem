@@ -28,13 +28,18 @@ namespace UISystem
             
             TWindow window;
             if (HasWindow(windowId, out var result))
+            {
                 window = (TWindow)result;
+                await window.OpenAsync(payload);
+            }
             else
+            {
                 window = await CreateNewWindow<TWindow>(windowId);
+                window.SetStatus(Status.Opening);
+                await window.OpenAsync(payload);
+                window.SetStatus(Status.Opened);
+            }
 
-            window.SetStatus(Status.Opening);
-            await window.OpenAsync(payload);
-            window.SetStatus(Status.Opened);
             return window;
         }
 
