@@ -1,4 +1,4 @@
-﻿using System.Threading;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using PlayableNodes;
 using PlayableNodes.Extensions;
@@ -14,7 +14,7 @@ namespace UISystem
         private const int FROM_TARGET_PIN = 2;
         
         private ITracksPlayer _playerCollection;
-
+        private ITracksPlayer PlayerCollection => _playerCollection ??= GetComponent<ITracksPlayer>();
         private void Awake()
         {
             _playerCollection = GetComponent<ITracksPlayer>();
@@ -22,16 +22,16 @@ namespace UISystem
 
         public async UniTask MoveToTarget(Transform to, CancellationToken cancellationToken = default)
         {
-            _playerCollection.ChangeEndValueByPin(END_TARGET_PIN, to);
-            await _playerCollection.PlayAsync(FLY_TRACK_NAME,cancellationToken);
+            PlayerCollection.ChangeEndValueByPin(END_TARGET_PIN, to);
+            await PlayerCollection.PlayAsync(FLY_TRACK_NAME,cancellationToken);
         }
         
         public async UniTask MoveToTarget(Transform from, Transform to, CancellationToken cancellationToken = default)
         {
             transform.position = from.transform.position;
-            _playerCollection.ChangeEndValueByPin(END_TARGET_PIN, to);
-            _playerCollection.ChangeEndValueByPin(FROM_TARGET_PIN, from);
-            await _playerCollection.PlayAsync(FLY_TRACK_NAME, cancellationToken);
+            PlayerCollection.ChangeEndValueByPin(END_TARGET_PIN, to);
+            PlayerCollection.ChangeEndValueByPin(FROM_TARGET_PIN, from);
+            await PlayerCollection.PlayAsync(FLY_TRACK_NAME, cancellationToken);
         }
     }
 }
