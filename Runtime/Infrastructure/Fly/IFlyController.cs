@@ -6,6 +6,8 @@ namespace UISystem
 {
     public interface IFlyController
     {
-        UniTask FlyRewardToAnchor(IFlyComponent view, int anchor, CancellationToken cancellationToken = default);
+        UniTask FlyToAnchor(IFlyComponent view, int anchor, CancellationToken cancellationToken = default);
+        UniTask FlyToTarget(IFlyComponent view, Transform target, CancellationToken cancellationToken = default);
+        UniTask FlyToTarget(IFlyComponent view,Transform from, Transform target, CancellationToken cancellationToken = default);
     }
 }

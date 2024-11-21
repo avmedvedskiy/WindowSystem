@@ -15,7 +15,7 @@ namespace UISystem
             _flyRootProvider = flyRootProvider;
             _anchorsProvider = anchorsProvider;
         }
-        public async UniTask FlyRewardToAnchor(IFlyComponent view, int anchor, CancellationToken cancellationToken = default)
+        public async UniTask FlyToAnchor(IFlyComponent view, int anchor, CancellationToken cancellationToken = default)
         {
             if (_anchorsProvider.TryGetAnchor(anchor, out var to))
             {
@@ -31,6 +31,23 @@ namespace UISystem
             {
                 Debug.LogError($"Anchor is null {anchor}");
             }
+        }
+        
+        public async UniTask FlyToTarget(IFlyComponent view, Transform target, CancellationToken cancellationToken = default)
+        {
+            view.SetParent(Root);
+            await view
+                .MoveToTarget(target, cancellationToken)
+                .AndActivateView(view,cancellationToken);
+        }
+
+        public async UniTask FlyToTarget(IFlyComponent view, Transform from, Transform target,
+            CancellationToken cancellationToken = default)
+        {
+            view.SetParent(Root);
+            await view
+                .MoveToTarget(from, target, cancellationToken)
+                .AndActivateView(view,cancellationToken);
         }
     }
 }
