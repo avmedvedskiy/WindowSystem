@@ -48,4 +48,48 @@ namespace UISystem
             Parent = parent;
         }
     }
+    
+    
+    public abstract class BaseWindow : MonoBehaviour, IWindow
+    {
+        public event Action<Status> OnStatusChanged;
+        public string Id { get; private set; }
+        public Status Status { get; private set; }
+        public IWindowService Parent { get; private set; }
+
+        [SerializeField] private BaseWindowAnimation _windowAnimation;
+
+        UniTask IWindow.OpenAsync()
+        {
+            return OnOpenAsync();
+        }
+
+        UniTask IClosedWindow.CloseAsync() => OnCloseAsync();
+
+        protected virtual UniTask OnOpenAsync() =>
+            Status != Status.Opened
+                ? _windowAnimation.OpenAnimationAsync()
+                : UniTask.CompletedTask;
+
+        protected virtual UniTask OnCloseAsync() => _windowAnimation.CloseAnimationAsync();
+
+        public void CloseWindow() =>
+            Parent
+                .CloseAsync(Id)
+                .Forget();
+
+        private void OnValidate() => _windowAnimation ??= GetComponent<BaseWindowAnimation>();
+
+        void IClosedWindow.SetStatus(Status status)
+        {
+            Status = status;
+            OnStatusChanged?.Invoke(Status);
+        }
+
+        void IClosedWindow.Initialize(string id, IWindowService parent)
+        {
+            Id = id;
+            Parent = parent;
+        }
+    }
 }

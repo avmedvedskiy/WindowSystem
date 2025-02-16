@@ -20,12 +20,14 @@ namespace UISystem
             _windowRootProvider = windowRootProvider;
         }
 
-        public async UniTask<TWindow> OpenAsync<TWindow, TPayload>(string windowId, TPayload payload = default, bool inQueue = false)
+        public async UniTask<TWindow> OpenAsync<TWindow, TPayload>(string windowId,
+            TPayload payload = default,
+            bool inQueue = false)
             where TWindow : IWindow<TPayload>
         {
-            if(inQueue)
+            if (inQueue)
                 await WaitInQueue();
-            
+
             TWindow window;
             if (HasWindow(windowId, out var result))
             {
@@ -43,6 +45,29 @@ namespace UISystem
             return window;
         }
 
+        public async UniTask<TWindow> OpenAsync<TWindow>(string windowId, bool inQueue = false)
+            where TWindow : IWindow
+        {
+            if (inQueue)
+                await WaitInQueue();
+
+            TWindow window;
+            if (HasWindow(windowId, out var result))
+            {
+                window = (TWindow)result;
+                await window.OpenAsync();
+            }
+            else
+            {
+                window = await CreateNewWindow<TWindow>(windowId);
+                window.SetStatus(Status.Opening);
+                await window.OpenAsync();
+                window.SetStatus(Status.Opened);
+            }
+
+            return window;
+        }
+
         public TWindow GetOpenedWindow<TWindow>(string windowId)
         {
             if (HasWindow(windowId, out var window))
@@ -52,9 +77,9 @@ namespace UISystem
 
         public async UniTask CloseAsync(string windowId)
         {
-            if(!HasWindow(windowId, out _))
+            if (!HasWindow(windowId, out _))
                 return;
-            
+
             var window = _openedWindows[windowId];
             _openedWindows.Remove(windowId);
             window.SetStatus(Status.Closing);
@@ -63,10 +88,10 @@ namespace UISystem
             _windowFactory.DestroyWindow(window);
             ProcessQueue();
         }
-        
+
         private async UniTask<TWindow> CreateNewWindow<TWindow>(string windowId) where TWindow : IClosedWindow
         {
-            _openedWindows[windowId] = default; //запоминаем за собой ячейку, чтобы до загрузки уже работала очередь
+            _openedWindows[windowId] = null; //запоминаем за собой ячейку, чтобы до загрузки уже работала очередь
             var window = await _windowFactory.InstantiateAsync<TWindow>(windowId, _windowRootProvider.Root);
             _openedWindows[windowId] = window;
             window.Initialize(windowId, this);
@@ -99,6 +124,5 @@ namespace UISystem
 
         private bool HasWindow(string windowId, out IClosedWindow window) =>
             _openedWindows.TryGetValue(windowId, out window);
-
     }
 }

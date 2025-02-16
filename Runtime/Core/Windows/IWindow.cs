@@ -7,4 +7,9 @@ namespace UISystem
         TPayload Payload { get; }
         UniTask OpenAsync(TPayload payload);
     }
+
+    public interface IWindow : IClosedWindow
+    {
+        UniTask OpenAsync();
+    }
 }
