@@ -7,7 +7,6 @@ namespace UISystem
     public class WindowFactory : IWindowFactory
     {
         private readonly WindowFactoryConfig _config;
-        private string _resourcesPath;
         
         public WindowFactory(WindowFactoryConfig config)
         {
