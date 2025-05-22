@@ -87,13 +87,29 @@ namespace UISystem.Editor
             var name = window.gameObject.name;
             var payloadDataType = GenericTypeArgumentDeep(type);
             var constName = ConvertToConstantName(name);
+            return payloadDataType != null
+                ? ConvertWindowWithPayload(type, name, payloadDataType, constName)
+                : ConvertWindowWithoutPayload(type, name, constName);
+        }
+
+        private static string ConvertWindowWithoutPayload(Type type, string name, string constName)
+        {
+            return
+                $"public static UniTask<{type.FullName}> Open{name}Async(this IWindowService service, bool inQueue = false)" +
+                $"=> service.OpenAsync<{type.FullName}>({constName},inQueue); \r\n" +
+                
+                $"public static UniTask Close{name}Async(this IWindowService service) => service.CloseAsync({constName});";
+        }
+        
+        private static string ConvertWindowWithPayload(Type type, string name, Type payloadDataType, string constName)
+        {
             return
                 $"public static UniTask<{type.FullName}> Open{name}Async(this IWindowService service, {payloadDataType.FullName} payload = default, bool inQueue = false)" +
                 $"=> service.OpenAsync<{type.FullName}, {payloadDataType.FullName}>({constName},payload,inQueue); \r\n" +
                 
                 $"public static UniTask Close{name}Async(this IWindowService service) => service.CloseAsync({constName});";
         }
-        
+
 
         private static IEnumerable<string> CreateWindowConstants(List<IClosedWindow> allWindows)
         {
