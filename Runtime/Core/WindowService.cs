@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -12,6 +13,8 @@ namespace UISystem
         private readonly Dictionary<string, IClosedWindow> _openedWindows = new();
         private readonly Queue<UniTaskCompletionSource> _queue = new();
 
+        public event Action<IClosedWindow> OnWindowOpened;
+        public event Action<IClosedWindow> OnWindowClosed;
         public Transform Root => _windowRootProvider.Root;
 
         public WindowService(IWindowFactory windowFactory, IWindowRootProvider windowRootProvider)
@@ -40,6 +43,7 @@ namespace UISystem
                 window.SetStatus(Status.Opening);
                 await window.OpenAsync(payload);
                 window.SetStatus(Status.Opened);
+                OnWindowOpened?.Invoke(window);
             }
 
             return window;
@@ -63,6 +67,7 @@ namespace UISystem
                 window.SetStatus(Status.Opening);
                 await window.OpenAsync();
                 window.SetStatus(Status.Opened);
+                OnWindowOpened?.Invoke(window);
             }
 
             return window;
@@ -85,6 +90,7 @@ namespace UISystem
             window.SetStatus(Status.Closing);
             await window.CloseAsync();
             window.SetStatus(Status.Closed);
+            OnWindowClosed?.Invoke(window);
             _windowFactory.DestroyWindow(window);
             ProcessQueue();
         }
