@@ -1,7 +1,7 @@
 {
   "name": "com.avmedvedskiy.uisystem",
   "displayName": "Infrastructure.WindowSystem",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "unity": "2021.3",
   "author": "avmedvedskiy",
   "description": "Window System",
@@ -9,6 +9,7 @@
     "common"
   ],
   "documentationUrl": "https://github.com/avmedvedskiy/WindowSystem",
+  "changelogUrl": "https://github.com/avmedvedskiy/WindowSystem/releases",
   "_upm":
   {
 	  "changelog" : "### Fixes & Improvements\n - Fix first window in queue"
