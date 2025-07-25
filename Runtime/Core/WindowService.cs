@@ -48,6 +48,7 @@ namespace UISystem
 
             return window;
         }
+        
 
         public async UniTask<TWindow> OpenAsync<TWindow>(string windowId, bool inQueue = false)
             where TWindow : IWindow
@@ -104,11 +105,14 @@ namespace UISystem
             return window;
         }
 
-        private UniTask WaitInQueue()
+        private async UniTask WaitInQueue()
         {
+            if (_queue.Count == 0)
+                return;
+            
             var completionSource = new UniTaskCompletionSource();
             _queue.Enqueue(completionSource);
-            return completionSource.Task;
+            await completionSource.Task;
         }
 
         private void ProcessQueue()

@@ -1,11 +1,17 @@
 {
   "name": "com.avmedvedskiy.uisystem",
   "displayName": "Infrastructure.WindowSystem",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "unity": "2021.3",
   "author": "avmedvedskiy",
   "description": "Window System",
   "keywords": [
     "common"
-  ]
+  ],
+  "documentationUrl": "https://github.com/avmedvedskiy/WindowSystem",
+  "_upm":
+  {
+	  "changelog" : "### Fixes & Improvements\n - Fix first window in queue"
+  },
+  
 }
