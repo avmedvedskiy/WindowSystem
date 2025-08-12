@@ -11,7 +11,7 @@ namespace UISystem
         private readonly IWindowRootProvider _windowRootProvider;
 
         private readonly Dictionary<string, IClosedWindow> _openedWindows = new(16);
-        private readonly List<string> _queueWindows = new(16);
+        private readonly HashSet<string> _queueWindows = new(16);
         private readonly Queue<UniTaskCompletionSource> _queue = new(16);
 
         public event Action<IClosedWindow> OnWindowOpened;
