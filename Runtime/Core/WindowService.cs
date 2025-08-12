@@ -10,8 +10,9 @@ namespace UISystem
         private readonly IWindowFactory _windowFactory;
         private readonly IWindowRootProvider _windowRootProvider;
 
-        private readonly Dictionary<string, IClosedWindow> _openedWindows = new();
-        private readonly Queue<UniTaskCompletionSource> _queue = new();
+        private readonly Dictionary<string, IClosedWindow> _openedWindows = new(16);
+        private readonly List<string> _queueWindows = new(16);
+        private readonly Queue<UniTaskCompletionSource> _queue = new(16);
 
         public event Action<IClosedWindow> OnWindowOpened;
         public event Action<IClosedWindow> OnWindowClosed;
@@ -48,7 +49,7 @@ namespace UISystem
 
             return window;
         }
-        
+
 
         public async UniTask<TWindow> OpenAsync<TWindow>(string windowId, bool inQueue = false)
             where TWindow : IWindow
@@ -91,6 +92,7 @@ namespace UISystem
             window.SetStatus(Status.Closing);
             await window.CloseAsync();
             window.SetStatus(Status.Closed);
+            _queueWindows.Remove(window.Id);
             OnWindowClosed?.Invoke(window);
             _windowFactory.DestroyWindow(window);
             ProcessQueue();
@@ -98,26 +100,29 @@ namespace UISystem
 
         private async UniTask<TWindow> CreateNewWindow<TWindow>(string windowId) where TWindow : IClosedWindow
         {
-            _openedWindows[windowId] = null; //запоминаем за собой ячейку, чтобы до загрузки уже работала очередь
+            _queueWindows.Add(windowId); //запоминаем за собой ячейку, чтобы до загрузки уже работала очередь
+            _openedWindows[windowId] = null; 
             var window = await _windowFactory.InstantiateAsync<TWindow>(windowId, _windowRootProvider.Root);
             _openedWindows[windowId] = window;
             window.Initialize(windowId, this);
+            if(window.IgnoreInQueue)//если окно не должно блокировать очередь - убираем его оттуда
+                _queueWindows.Remove(windowId);
             return window;
         }
 
         private async UniTask WaitInQueue()
         {
-            if (_queue.Count == 0)
-                return;
-            
-            var completionSource = new UniTaskCompletionSource();
-            _queue.Enqueue(completionSource);
-            await completionSource.Task;
+            if (HasWindowsInQueue())
+            {
+                var completionSource = new UniTaskCompletionSource();
+                _queue.Enqueue(completionSource);
+                await completionSource.Task;
+            }
         }
 
         private void ProcessQueue()
         {
-            if (HasOpenedWindows() == false && HasWindowsInQueue())
+            if (HasWindowsInQueue() == false && _queue.Count > 0)
             {
                 _queue
                     .Dequeue()
@@ -127,10 +132,8 @@ namespace UISystem
 
         private bool HasWindowsInQueue()
         {
-            return _queue.Count > 0;
+            return _queueWindows.Count > 0;
         }
-
-        private bool HasOpenedWindows() => _openedWindows.Count != 0;
 
         private bool HasWindow(string windowId, out IClosedWindow window) =>
             _openedWindows.TryGetValue(windowId, out window);

@@ -7,6 +7,7 @@ namespace UISystem
     public abstract class BaseWindow<TPayload> : MonoBehaviour, IWindow<TPayload>
     {
         public event Action<Status> OnStatusChanged;
+        [field: SerializeField] public bool IgnoreInQueue { get;private set; }
         public string Id { get; private set; }
         public Status Status { get; private set; }
         public IWindowService Parent { get; private set; }
@@ -19,7 +20,6 @@ namespace UISystem
             Payload = payload;
             return OnOpenAsync(payload);
         }
-
         UniTask IClosedWindow.CloseAsync() => OnCloseAsync();
 
         protected virtual UniTask OnOpenAsync(TPayload payload) =>
@@ -52,6 +52,8 @@ namespace UISystem
     
     public abstract class BaseWindow : MonoBehaviour, IWindow
     {
+        [field: SerializeField] public bool IgnoreInQueue { get;private set; }
+        
         public event Action<Status> OnStatusChanged;
         public string Id { get; private set; }
         public Status Status { get; private set; }
