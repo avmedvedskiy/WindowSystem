@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using NUnit.Framework;
 using UnityEditor;
 using UnityEditor.Compilation;
 using UnityEngine;
@@ -133,7 +134,8 @@ namespace UISystem.Editor
             foreach (var path in paths)
             {
                 var asset = AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(path));
-                if (asset.TryGetComponent<IClosedWindow>(out var window))
+                if (asset.TryGetComponent<IClosedWindow>(out var window) 
+                    && window.GetType().HasAttributeInHierarchy<IgnoreGenerationAttribute>() == false)
                 {
                     windows.Add(window);
                 }
@@ -142,6 +144,15 @@ namespace UISystem.Editor
             windows.Sort((x, y) => string.CompareOrdinal(x.gameObject.name, y.gameObject.name));
             return windows;
         }
+
+        private static bool HasAttributeInHierarchy<TAttr>(this Type type)
+            where TAttr : Attribute
+        {
+            if (Attribute.IsDefined(type, typeof(TAttr), inherit: false))
+                return true;
+            return type.BaseType?.HasAttributeInHierarchy<TAttr>() ?? false;
+        }
+        
 
         private static Type GenericTypeArgumentDeep(Type type)
         {
