@@ -31,8 +31,8 @@ namespace UISystem
 
         private async UniTask<TWindow> InstantiateFromResources<TWindow>(string windowId, Transform root)
         {
-            var folder = string.IsNullOrEmpty(_config.FolderName) ? string.Empty : $"{_config.FolderName}/";
-            var asset = await Resources.LoadAsync<GameObject>($"{folder}{windowId}").ToUniTask();
+            var path = string.IsNullOrEmpty(_config.FolderName) ? windowId : $"{_config.FolderName}/{windowId}";
+            var asset = await Resources.LoadAsync<GameObject>(path).ToUniTask();
             var go = (GameObject)Object.Instantiate(asset,root);
             return go.GetComponent<TWindow>();
         }

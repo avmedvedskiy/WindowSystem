@@ -26,8 +26,8 @@ namespace UISystem
 
 #if UNITY_IOS
             //on ios strange x2 size on safe area
-            safeArea.width = Screen.width - safeArea.x;
-            safeArea.x /= 2;
+            //needRect.width = Screen.width - safeArea.x;
+            //needRect.x /= 2;
 #endif
 
             if (needRect.width != screenRect.width || needRect.height != screenRect.height)
