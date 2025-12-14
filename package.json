@@ -1,7 +1,7 @@
 {
   "name": "com.avmedvedskiy.uisystem",
   "displayName": "Infrastructure.WindowSystem",
-  "version": "1.2.8",
+  "version": "1.2.9",
   "unity": "2021.3",
   "author": "avmedvedskiy",
   "description": "Window System",

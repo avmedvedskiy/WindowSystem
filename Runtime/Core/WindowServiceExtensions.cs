@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using Cysharp.Threading.Tasks;
+using UnityEngine;
 
 namespace UISystem
 {
@@ -32,7 +33,7 @@ namespace UISystem
             where TWindow : IClosedWindow
         {
             var w = await window;
-            await UniTask.WaitWhile(() => w != null && w.Status != Status.Closing);
+            await UniTask.WaitWhile(() => w != null && w.Status != Status.Closing && w.Status != Status.Closed);
         }
 
         public static async UniTask<TResult> AndWaitResult<TWindow, TResult>(this UniTask<TWindow> window)
