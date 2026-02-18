@@ -16,24 +16,22 @@ namespace UISystem
 
         public void Start()
         {
-            CalculateSafeArea();
+            ApplySafeArea(CalculateSafeArea());
         }
 
-        private void CalculateSafeArea()
+        private Rect CalculateSafeArea()
         {
-            var screenRect = new Rect(0, 0, Screen.width, Screen.height);
             var needRect = Screen.safeArea;
 
 #if UNITY_IOS
             //on ios strange x2 size on safe area
-            //needRect.width = Screen.width - safeArea.x;
-            //needRect.x /= 2;
+            needRect.x /= 2;
+            needRect.width = Screen.safeArea.width + needRect.x * 2f ;
+            
+            needRect.y /= 2;
+            needRect.height = Screen.safeArea.height + needRect.y * 2f;
 #endif
-
-            if (needRect.width != screenRect.width || needRect.height != screenRect.height)
-            {
-                ApplySafeArea(needRect);
-            }
+            return needRect;
         }
 
         private Rect _lastSafeArea;
@@ -42,8 +40,7 @@ namespace UISystem
         {
             if (_lastSafeArea != Screen.safeArea)
             {
-                ApplySafeArea(Screen.safeArea);
-                _lastSafeArea = Screen.safeArea;
+                ApplySafeArea(CalculateSafeArea());
             }
         }
 
@@ -64,6 +61,7 @@ namespace UISystem
             _safeAreaRoot.anchorMax = anchorMax;
             SafeRect = area;
             ScreenRect = _canvas;
+            _lastSafeArea = Screen.safeArea;
         }
     }
 }
