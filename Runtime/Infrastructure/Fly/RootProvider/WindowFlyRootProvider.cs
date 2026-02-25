@@ -5,7 +5,7 @@ namespace UISystem
     public class WindowFlyRootProvider : IFlyRootProvider
     {
         private readonly IWindowRootProvider _windowRootProvider;
-        public Transform Root => _windowRootProvider.Root;
+        public Transform Root => _windowRootProvider.OverlayRoot;
 
         public WindowFlyRootProvider(IWindowRootProvider windowRootProvider)
         {
