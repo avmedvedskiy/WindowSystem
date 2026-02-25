@@ -5,5 +5,6 @@ namespace UISystem
     public interface IWindowRootProvider
     {
         Transform Root { get; }
+        Transform OverlayRoot { get; }
     }
 }
