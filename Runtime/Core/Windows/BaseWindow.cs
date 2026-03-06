@@ -8,6 +8,7 @@ namespace UISystem
     {
         public event Action<Status> OnStatusChanged;
         [field: SerializeField] public bool IgnoreInQueue { get;private set; }
+        public virtual bool CanClose => true;
         public string Id { get; private set; }
         public Status Status { get; private set; }
         public IWindowService Parent { get; private set; }
@@ -53,7 +54,7 @@ namespace UISystem
     public abstract class BaseWindow : MonoBehaviour, IWindow
     {
         [field: SerializeField] public bool IgnoreInQueue { get;private set; }
-        
+        public bool CanClose => true;
         public event Action<Status> OnStatusChanged;
         public string Id { get; private set; }
         public Status Status { get; private set; }

@@ -12,6 +12,7 @@ namespace UISystem
         IWindowService Parent { get;}
         GameObject gameObject { get; }
         bool IgnoreInQueue { get; }
+        bool CanClose { get; }
         internal UniTask CloseAsync();
         internal void SetStatus(Status status);
         internal void Initialize(string id, IWindowService parent);

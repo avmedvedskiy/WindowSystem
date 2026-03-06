@@ -84,18 +84,17 @@ namespace UISystem
 
         public async UniTask CloseAsync(string windowId)
         {
-            if (!HasWindow(windowId, out _))
-                return;
-
-            var window = _openedWindows[windowId];
-            _openedWindows.Remove(windowId);
-            window.SetStatus(Status.Closing);
-            await window.CloseAsync();
-            window.SetStatus(Status.Closed);
-            _queueWindows.Remove(window.Id);
-            OnWindowClosed?.Invoke(window);
-            _windowFactory.DestroyWindow(window);
-            ProcessQueue();
+            if (HasWindow(windowId, out var window) && window.CanClose)
+            {
+                _openedWindows.Remove(windowId);
+                window.SetStatus(Status.Closing);
+                await window.CloseAsync();
+                window.SetStatus(Status.Closed);
+                _queueWindows.Remove(window.Id);
+                OnWindowClosed?.Invoke(window);
+                _windowFactory.DestroyWindow(window);
+                ProcessQueue();
+            }
         }
 
         private async UniTask<TWindow> CreateNewWindow<TWindow>(string windowId) where TWindow : IClosedWindow
