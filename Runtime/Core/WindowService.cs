@@ -135,6 +135,6 @@ namespace UISystem
         }
 
         private bool HasWindow(string windowId, out IClosedWindow window) =>
-            _openedWindows.TryGetValue(windowId, out window);
+            _openedWindows.TryGetValue(windowId, out window) && window != null;
     }
 }
