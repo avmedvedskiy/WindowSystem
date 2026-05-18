@@ -6,39 +6,39 @@ on:
     types: [published]
 
 env:
-  # Если package.json лежит в корне репозитория — оставь "."
-  # Если пакет лежит в Packages/com.company.package — укажи этот путь
   PACKAGE_PATH: "."
   OUTPUT_PATH: "dist"
 
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
 
     permissions:
       contents: read
-      id-token: write
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js for npm publish
+        uses: actions/setup-node@v4
         with:
           node-version: "20.x"
           registry-url: "https://registry.npmjs.org/"
 
-      # Если у тебя реально нужны зависимости/сборка — оставь.
-      # Если это чистый Unity package без build-шага, можно удалить.
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
       - name: Install Unity UPM CLI
+        shell: bash
         run: |
-          curl -fsSL https://cdn.packages.unity.com/upm-cli/install.sh | bash
-          source ~/.bashrc || true
-          upm --version
+          set -euo pipefail
 
-      - name: Pack and sign Unity package
+          curl -fsSL https://cdn.packages.unity.com/upm-cli/install.sh | bash
+
+          echo "$HOME/.upm/bin" >> "$GITHUB_PATH"
+
+          "$HOME/.upm/bin/upm" --version
+
+      - name: Pack and sign Unity UPM package
+        shell: bash
         env:
           UPM_SERVICE_ACCOUNT_KEY_ID: ${{ secrets.UPM_SERVICE_ACCOUNT_KEY_ID }}
           UPM_SERVICE_ACCOUNT_KEY_SECRET: ${{ secrets.UPM_SERVICE_ACCOUNT_KEY_SECRET }}
@@ -55,10 +55,18 @@ jobs:
           echo "Created package:"
           ls -la "$OUTPUT_PATH"
 
-          echo "Verify signature file exists:"
+          echo "Verify Unity signature:"
           tar -tf "$OUTPUT_PATH"/*.tgz | grep -E '^package/\.attestation\.p7m$'
 
       - name: Publish signed package to npm
-        run: npm publish "$OUTPUT_PATH"/*.tgz --access public
+        shell: bash
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          PACKAGE_FILE="$(ls "$OUTPUT_PATH"/*.tgz | head -n 1)"
+
+          echo "Publishing package: $PACKAGE_FILE"
+
+          npm publish "$PACKAGE_FILE" --access public
