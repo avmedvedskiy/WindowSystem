@@ -1,4 +1,4 @@
-name: Publish signed Unity UPM package to npm
+﻿name: Publish signed Unity UPM package to npm
 
 on:
   workflow_dispatch:
@@ -77,3 +77,4 @@ jobs:
           echo "Publishing package: $PACKAGE_FILE"
 
           npm publish "$PACKAGE_FILE" --access public
+
