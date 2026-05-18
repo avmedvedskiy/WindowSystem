@@ -65,7 +65,14 @@ jobs:
         run: |
           set -euo pipefail
 
-          PACKAGE_FILE="$(ls "$OUTPUT_PATH"/*.tgz | head -n 1)"
+          PACKAGE_FILE="$(find "$OUTPUT_PATH" -name "*.tgz" -type f | head -n 1)"
+
+          if [ -z "$PACKAGE_FILE" ]; then
+            echo "No .tgz package found in $OUTPUT_PATH"
+            exit 1
+          fi
+
+          PACKAGE_FILE="$(realpath "$PACKAGE_FILE")"
 
           echo "Publishing package: $PACKAGE_FILE"
 
